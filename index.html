@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Super Simulado Moodle: Banco de Dados 1 | IFSP</title>
-  <meta name="description" content="Super Simulado com 15 questões interativas de Álgebra Relacional, DER, Mapeamento Lógico e Teoria de SGBD no formato Moodle IFSP">
+  <title>Simulado Moodle Oficial: Banco de Dados 1 | IFSP</title>
+  <meta name="description" content="Simulado oficial com 15 questões interativas de Álgebra Relacional, DER de Peter Chen, Mapeamento Lógico e Teoria de SGBD no formato exato do Moodle IFSP">
   <meta name="theme-color" content="#15803d">
   
-  <!-- Tailwind CSS & FontAwesome -->
+  <!-- Tailwind CSS, FontAwesome & KaTeX for Math Formulas -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -26,6 +28,10 @@
               800: "#166534",
               900: "#14532d",
             }
+          },
+          fontFamily: {
+            mono: ["Fira Code", "Courier New", "monospace"],
+            math: ["Cambria Math", "Latin Modern Math", "Georgia", "serif"]
           }
         }
       }
@@ -33,7 +39,7 @@
   </script>
 
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400&display=swap");
     
     * {
       -webkit-tap-highlight-color: transparent;
@@ -44,57 +50,52 @@
       font-family: "Plus Jakarta Sans", sans-serif;
     }
 
-    code, pre {
-      font-family: "Fira Code", monospace;
+    .math-font {
+      font-family: "Lora", "Cambria Math", Georgia, serif;
     }
 
-    .dropzone {
-      min-height: 38px;
-      min-width: 44px;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-
-    .dropzone:hover {
-      border-color: #16a34a;
-      background-color: #f0fdf4;
-    }
-
-    .dark .dropzone:hover {
-      background-color: #14532d30;
-      border-color: #4ade80;
-    }
-
-    .dropzone.filled {
-      border-style: solid !important;
-      border-color: #16a34a !important;
-      background-color: #dcfce7 !important;
-      color: #14532d !important;
+    /* MOODLE DRAGGABLE TOKEN BADGES (Identical to IFSP Moodle photo) */
+    .moodle-token {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px 6px 24px;
+      border-radius: 9999px;
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      color: #1e293b;
+      font-size: 13px;
       font-weight: 700;
-    }
-
-    .dark .dropzone.filled {
-      background-color: #14532d !important;
-      border-color: #4ade80 !important;
-      color: #dcfce7 !important;
-    }
-
-    .draggable-token {
       cursor: pointer;
       user-select: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .draggable-token:hover {
+    .dark .moodle-token {
+      background: #1e293b;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+
+    .moodle-token::before {
+      content: "✢";
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 900;
+    }
+
+    .moodle-token:hover {
+      border-color: #16a34a;
       transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    .draggable-token:active {
-      transform: scale(0.95);
-    }
-
-    .draggable-token.selected-for-drop {
+    .moodle-token.selected {
       border-color: #16a34a !important;
       background-color: #dcfce7 !important;
       color: #14532d !important;
@@ -102,40 +103,124 @@
       box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.35);
     }
 
-    .dark .draggable-token.selected-for-drop {
+    .dark .moodle-token.selected {
       background-color: #14532d !important;
       border-color: #4ade80 !important;
       color: #dcfce7 !important;
       box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.35);
     }
 
+    /* MOODLE GRAY SLOTS (Identical to grey rectangle dropzones in Moodle) */
+    .moodle-slot {
+      background-color: #d1d5db;
+      border: 2px dashed #9ca3af;
+      border-radius: 6px;
+      min-height: 38px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #111827;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+      padding: 4px 10px;
+    }
+
+    .dark .moodle-slot {
+      background-color: #334155;
+      border-color: #64748b;
+      color: #f8fafc;
+    }
+
+    .moodle-slot:hover {
+      border-color: #16a34a;
+      background-color: #e2e8f0;
+    }
+
+    .moodle-slot.filled {
+      background-color: #ffffff !important;
+      border: 2px solid #16a34a !important;
+      color: #15803d !important;
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.2);
+    }
+
+    .dark .moodle-slot.filled {
+      background-color: #0f172a !important;
+      border-color: #4ade80 !important;
+      color: #4ade80 !important;
+    }
+
+    /* DER PETER CHEN DIAGRAM ELEMENTS */
+    .der-entity {
+      border: 2.5px solid #0f766e;
+      background-color: #f0fdfa;
+      border-radius: 4px;
+      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.15);
+    }
+    .dark .der-entity {
+      background-color: #134e4a;
+      border-color: #2dd4bf;
+      color: #ccfbf1;
+    }
+
+    .der-attribute {
+      border: 2px solid #64748b;
+      background-color: #f8fafc;
+      border-radius: 9999px;
+      padding: 4px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .dark .der-attribute {
+      background-color: #1e293b;
+      border-color: #94a3b8;
+      color: #f1f5f9;
+    }
+
+    .der-relationship {
+      border: 2.5px solid #d97706;
+      background-color: #fffbeb;
+      transform: rotate(45deg);
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.15);
+    }
+    .dark .der-relationship {
+      background-color: #78350f;
+      border-color: #fbbf24;
+      color: #fef3c7;
+    }
+
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 antialiased pb-20">
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 antialiased pb-24">
 
-  <!-- MOODLE TOP NAV -->
+  <!-- MOODLE TOP NAV (Exact IFSP Style) -->
   <header class="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
     <div class="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2">
       
-      <!-- IFSP Moodle Brand -->
-      <div class="flex items-center space-x-2 sm:space-x-3">
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-2.5 sm:space-x-3">
         <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-700 flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0">
           <i class="fa-solid fa-database"></i>
         </div>
         <div>
-          <h1 class="text-xs sm:text-sm font-extrabold leading-tight text-slate-900 dark:text-white">Banca de Questões • Banco de Dados</h1>
-          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">SGBD 01 • Prof. Flávio Mania | IFSP</p>
+          <h1 class="text-xs sm:text-sm font-extrabold leading-tight text-slate-900 dark:text-white">Moodle IFSP • Banco de Dados</h1>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">Graduação SGBD 01 • Prof. Flávio Mania</p>
         </div>
       </div>
 
       <!-- Controls & Timer -->
       <div class="flex items-center space-x-2 sm:space-x-3">
-        <!-- Live Score -->
+        <!-- Live Progress -->
         <div class="flex items-center bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-200 dark:border-emerald-800/80">
-          <i class="fa-solid fa-star text-amber-500 mr-1.5 text-[11px]"></i>
-          <span>Progresso: <span id="headerProgress">0/15</span></span>
+          <i class="fa-solid fa-check-circle text-emerald-500 mr-1.5 text-[11px]"></i>
+          <span>Respondidas: <span id="headerProgress">0/15</span></span>
         </div>
 
         <!-- Timer -->
@@ -151,22 +236,24 @@
       </div>
     </div>
 
-    <!-- MOODLE BREADCRUMB -->
-    <div class="bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200/80 dark:border-slate-800 px-3 sm:px-6 py-1.5 text-[11px] text-slate-500 flex items-center overflow-x-auto no-scrollbar space-x-1.5">
+    <!-- MOODLE BREADCRUMB (Matching Screenshot) -->
+    <div class="bg-slate-50 dark:bg-slate-900/70 border-t border-slate-200/80 dark:border-slate-800 px-3 sm:px-6 py-1.5 text-[11px] text-slate-500 flex items-center overflow-x-auto no-scrollbar space-x-1.5">
       <i class="fa-solid fa-house text-emerald-600"></i>
       <span>&gt;</span>
       <span class="shrink-0">Meus cursos</span>
       <span>&gt;</span>
       <span class="shrink-0">Graduação - SGBD 01 - 2026/02</span>
       <span>&gt;</span>
-      <span class="shrink-0 font-semibold text-slate-800 dark:text-slate-200">Banca Completa de Simulado (15 Questões Interativas)</span>
+      <span class="shrink-0">Atividades Avaliativas</span>
+      <span>&gt;</span>
+      <span class="shrink-0 font-bold text-slate-800 dark:text-slate-200">Avaliação de Banco de Dados 1 — Simulador Oficial</span>
     </div>
 
-    <!-- MAIN TABS -->
+    <!-- HORIZONTAL CATEGORY TABS -->
     <div class="max-w-5xl mx-auto px-3 sm:px-6 flex overflow-x-auto space-x-1.5 sm:space-x-2 py-2 border-t border-slate-200 dark:border-slate-800 text-xs font-semibold no-scrollbar">
       <button onclick="switchCategory('todas')" id="tab-cat-todas" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-emerald-700 text-white flex items-center space-x-1.5 shadow-sm">
         <i class="fa-solid fa-layer-group"></i>
-        <span>Todas (15 Questões)</span>
+        <span>Todas as 15 Questões</span>
       </button>
       <button onclick="switchCategory('algebra')" id="tab-cat-algebra" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5">
         <i class="fa-solid fa-calculator"></i>
@@ -178,11 +265,11 @@
       </button>
       <button onclick="switchCategory('logico')" id="tab-cat-logico" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5">
         <i class="fa-solid fa-table"></i>
-        <span>Mapeamento Lógico & Tabelas</span>
+        <span>Mapeamento Lógico Relacional</span>
       </button>
       <button onclick="switchCategory('teoria')" id="tab-cat-teoria" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5">
         <i class="fa-solid fa-lightbulb"></i>
-        <span>Dado, Informação & Símbolos</span>
+        <span>Teoria & Simbologia</span>
       </button>
       <button onclick="switchCategory('resumo')" id="tab-cat-resumo" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5">
         <i class="fa-solid fa-book-bookmark"></i>
@@ -191,14 +278,14 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
+  <!-- MAIN WRAPPER -->
   <main class="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
 
-    <!-- QUESTION PAGINATOR GRID (1 to 15) -->
-    <div id="moodle-navigator-container" class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 mb-5">
+    <!-- MOODLE QUESTION NUMBER PAGINATOR -->
+    <div id="moodle-navigator-container" class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5 mb-5">
       <div class="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
         <span class="flex items-center"><i class="fa-solid fa-compass mr-1.5 text-emerald-600"></i> Navegação do Questionário:</span>
-        <button onclick="finishAllAttempt()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs transition flex items-center shadow-sm">
+        <button onclick="finishAllAttempt()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs transition flex items-center shadow-sm">
           <i class="fa-solid fa-flag-checkered mr-1.5"></i> Finalizar Tentativa e Ver Nota
         </button>
       </div>
@@ -209,56 +296,47 @@
       </div>
     </div>
 
-    <!-- HELPER INSTRUCTION BANNER -->
-    <div id="instruction-banner" class="mb-5 p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 flex items-start space-x-2.5">
-      <i class="fa-solid fa-mobile-screen-button text-emerald-600 mt-0.5 text-base shrink-0"></i>
-      <div class="leading-relaxed">
-        <strong class="font-bold">Dica de Interação Mobile & Desktop:</strong> 
-        Para preencher qualquer quadrado cinza, <strong>toque na peça do banco</strong> (ela ficará destacada em verde) e depois <strong>toque no quadrado de destino</strong>. Para remover uma peça colocada, basta tocar sobre ela no quadrado!
-      </div>
-    </div>
-
-    <!-- QUESTIONS CONTAINER (15 Interactive Questions) -->
+    <!-- QUESTIONS CONTAINER -->
     <div id="questions-wrapper" class="space-y-6">
       <!-- Rendered dynamically by JS -->
     </div>
 
-    <!-- FINAL RESULT MODAL / REVISÃO DA TENTATIVA -->
-    <div id="final-result-card" class="hidden bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md space-y-5">
+    <!-- FINAL RESULT REVISION CARD -->
+    <div id="final-result-card" class="hidden bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
       <div class="text-center space-y-2">
         <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 text-3xl shadow-inner">
-          <i class="fa-solid fa-trophy"></i>
+          <i class="fa-solid fa-award"></i>
         </div>
-        <h2 class="text-xl font-black text-slate-900 dark:text-white">Resultado da Avaliação</h2>
-        <p class="text-xs text-slate-500">Graduação SGBD 01 • Banco de Dados • IFSP Câmpus Itapetininga</p>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white">Revisão da Tentativa</h2>
+        <p class="text-xs text-slate-500 font-medium">Graduação SGBD 01 • Banco de Dados • IFSP Câmpus Itapetininga</p>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
-          <span class="text-[10px] text-slate-400 block uppercase font-bold">Status</span>
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+          <span class="text-[10px] text-slate-400 block uppercase font-bold">Estado</span>
           <span class="text-xs font-bold text-emerald-600">Finalizada</span>
         </div>
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
-          <span class="text-[10px] text-slate-400 block uppercase font-bold">Tempo</span>
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+          <span class="text-[10px] text-slate-400 block uppercase font-bold">Tempo Gasto</span>
           <span id="res-time-total" class="text-xs font-bold text-slate-700 dark:text-slate-200">00:00:00</span>
         </div>
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
-          <span class="text-[10px] text-slate-400 block uppercase font-bold">Acertos</span>
-          <span id="res-corrects-count" class="text-xs font-bold text-emerald-600">15 / 15 questões</span>
+        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+          <span class="text-[10px] text-slate-400 block uppercase font-bold">Acertos Perfeitos</span>
+          <span id="res-corrects-count" class="text-xs font-bold text-emerald-600">15 / 15</span>
         </div>
-        <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+        <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
           <span class="text-[10px] text-emerald-600 block uppercase font-bold">Nota Final</span>
-          <span id="res-final-grade" class="text-base font-black text-emerald-700 dark:text-emerald-300">10,00 / 10,00</span>
+          <span id="res-final-grade" class="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-300">10,00 de 10,00 (100%)</span>
         </div>
       </div>
 
-      <!-- Detailed Question by Question Feedback -->
-      <div id="detailed-results-list" class="space-y-3 pt-2">
+      <!-- Question-by-Question Feedback List -->
+      <div id="detailed-results-list" class="space-y-3.5 pt-2">
         <!-- Rendered by JS -->
       </div>
 
-      <div class="flex justify-center pt-3">
-        <button onclick="restartFullExam()" class="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center">
+      <div class="flex justify-center pt-4">
+        <button onclick="restartFullExam()" class="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center shadow-sm">
           <i class="fa-solid fa-rotate-right mr-2"></i> Fazer Nova Tentativa
         </button>
       </div>
@@ -272,12 +350,12 @@
           <p class="text-xs text-slate-500">Consulta rápida para memorização de operadores, símbolos e regras de chave.</p>
         </div>
         <button onclick="window.print()" class="text-xs bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold flex items-center shadow-sm">
-          <i class="fa-solid fa-print mr-1.5"></i> Imprimir / PDF
+          <i class="fa-solid fa-print mr-1.5"></i> Imprimir / Salvar PDF
         </button>
       </div>
 
       <!-- SÍMBOLOS DER -->
-      <div class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+      <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
         <h3 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center">
           <i class="fa-solid fa-shapes mr-2"></i> Símbolos Oficiais do MER (Peter Chen)
         </h3>
@@ -302,21 +380,21 @@
       </div>
 
       <!-- ÁLGEBRA RELACIONAL -->
-      <div class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+      <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
         <h3 class="text-sm font-bold text-sky-700 dark:text-sky-400 flex items-center">
           <i class="fa-solid fa-calculator mr-2"></i> Operadores da Álgebra Relacional
         </h3>
-        <div class="space-y-2 text-xs">
-          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+        <div class="space-y-2.5 text-xs">
+          <div class="p-3 bg-slate-900 text-slate-100 rounded-xl">
             <span class="text-emerald-400 font-bold">σ (Seleção):</span> Filtra LINHAS / TUPLAS ➔ <code>σ_(sexo = 'F')(CLIENTE)</code>
           </div>
-          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+          <div class="p-3 bg-slate-900 text-slate-100 rounded-xl">
             <span class="text-sky-400 font-bold">π (Projeção):</span> Filtra COLUNAS / ATRIBUTOS ➔ <code>π_(nome, cidade)(CLIENTE)</code>
           </div>
-          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+          <div class="p-3 bg-slate-900 text-slate-100 rounded-xl">
             <span class="text-amber-400 font-bold">⨝ (Junção / Join):</span> Conecta tabelas com base em chaves ➔ <code>Aluno ⨝ Matricula</code>
           </div>
-          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+          <div class="p-3 bg-slate-900 text-slate-100 rounded-xl">
             <span class="text-rose-400 font-bold">− (Diferença):</span> Elementos na tabela A que não estão na B ➔ <code>π_RA(Aluno) − π_RA(Matricula)</code>
           </div>
         </div>
@@ -329,66 +407,71 @@
     Desenvolvido com foco no plano pedagógico de Banco de Dados (SGBD 01) • IFSP Câmpus Itapetininga
   </footer>
 
-  <!-- SCRIPT ENGINE: 15 RICH QUESTIONS -->
+  <!-- SCRIPT ENGINE: 15 RICH QUESTIONS WITH PETER CHEN VECTOR DIAGRAMS -->
   <script>
     const questionsBank = [
       // ==========================================
-      // QUESTÃO 1: ÁLGEBRA RELACIONAL - SELEÇÃO COMPOSTA
+      // QUESTÃO 1: ÁLGEBRA RELACIONAL - SELEÇÃO COMPOSTA (EXATO MOODLE)
       // ==========================================
       {
         id: 1,
         category: "algebra",
         title: "Álgebra Relacional — Seleção com Condição Composta",
-        statement: "Construa a expressão da Álgebra Relacional para encontrar <strong>todos os clientes do sexo Feminino que gostam da cor azul</strong> a partir da tabela CLIENTE:",
-        type: "slots",
+        statement: "Agora a expressão para <strong>todos os clientes do sexo Feminino que gostam da cor azul</strong>:",
+        type: "algebra-formula",
         tableContext: `
           <table class="w-full text-xs text-left">
             <thead class="bg-slate-900 text-white font-bold">
               <tr><th class="p-1.5 border-r border-slate-700">codigo</th><th class="p-1.5 border-r border-slate-700">nome</th><th class="p-1.5 border-r border-slate-700">sexo</th><th class="p-1.5 border-r border-slate-700">cidade</th><th class="p-1.5">cor_preferida</th></tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-[11px]">
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-[11px] font-medium">
               <tr><td class="p-1 font-bold">1</td><td class="p-1">Pica-Pau</td><td class="p-1">M</td><td class="p-1">Sorocaba</td><td class="p-1">Vermelho</td></tr>
-              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1 font-bold">5</td><td class="p-1">Vovó Pica-Pau</td><td class="p-1">F</td><td class="p-1">Sorocaba</td><td class="p-1">Roxo</td></tr>
-              <tr><td class="p-1 font-bold">8</td><td class="p-1">Gertrudes</td><td class="p-1">F</td><td class="p-1">São Miguel Arcanjo</td><td class="p-1">Vermelho</td></tr>
+              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1 font-bold">2</td><td class="p-1">Leôncio</td><td class="p-1">M</td><td class="p-1">Itapetininga</td><td class="p-1">Azul</td></tr>
+              <tr><td class="p-1 font-bold">5</td><td class="p-1">Vovó Pica-Pau</td><td class="p-1">F</td><td class="p-1">Sorocaba</td><td class="p-1">Roxo</td></tr>
+              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1 font-bold">8</td><td class="p-1">Gertrudes</td><td class="p-1">F</td><td class="p-1">São Miguel Arcanjo</td><td class="p-1">Vermelho</td></tr>
+              <tr><td class="p-1 font-bold">9</td><td class="p-1">Bernarda</td><td class="p-1">F</td><td class="p-1">Apiaí</td><td class="p-1">Marrom</td></tr>
             </tbody>
           </table>
         `,
+        // Exact 2D grid structure matching the Moodle screenshot!
+        layoutType: "moodle-q1-grid",
         slots: [
-          { id: "q1-1", correct: "σ", label: "Operador" },
-          { id: "q1-2", correct: "(", label: "(" },
-          { id: "q1-3", correct: "sexo", label: "campo" },
-          { id: "q1-4", correct: "=", label: "=" },
-          { id: "q1-5", correct: "'F'", label: "valor" },
-          { id: "q1-6", correct: "^", label: "op lógico" },
-          { id: "q1-7", correct: "cor_preferida", label: "campo" },
-          { id: "q1-8", correct: "=", label: "=" },
-          { id: "q1-9", correct: "'Azul'", label: "valor" },
-          { id: "q1-10", correct: ")", label: ")" },
-          { id: "q1-11", correct: "(CLIENTE)", label: "Tabela" }
+          { id: "q1-op", correct: "σ", label: "Operador" },
+          { id: "q1-c1", correct: "(", label: "(" },
+          { id: "q1-c2", correct: "sexo", label: "sexo" },
+          { id: "q1-c3", correct: "=", label: "=" },
+          { id: "q1-c4", correct: "'F'", label: "'F'" },
+          { id: "q1-c5", correct: "^", label: "^" },
+          { id: "q1-c6", correct: "cor_preferida", label: "cor_preferida" },
+          { id: "q1-c7", correct: "=", label: "=" },
+          { id: "q1-c8", correct: "'Azul'", label: "'Azul'" },
+          { id: "q1-c9", correct: ")", label: ")" },
+          { id: "q1-target", correct: "(CLIENTE)", label: "(CLIENTE)" }
         ],
         tokens: ["(", "^", "=", "*", "'Azul'", "'F'", "sexo", "(CLIENTE)", "cor_preferida", "π", "σ", ")"],
-        feedback: "Expressão correta: σ(sexo = 'F' ^ cor_preferida = 'Azul')(CLIENTE). O operador Sigma (σ) filtra tuplas que satisfazem a conjunção lógica."
+        feedback: "Fórmula correta: \\sigma_{(sexo = 'F' \\wedge cor\\_preferida = 'Azul')}(CLIENTE). O operador \\sigma (Sigma) filtra as tuplas que atendem a todas as condições unidas pelo operador lógico AND (^)."
       },
 
       // ==========================================
-      // QUESTÃO 2: ÁLGEBRA RELACIONAL - PROJEÇÃO
+      // QUESTÃO 2: ÁLGEBRA RELACIONAL - PROJEÇÃO (EXATO MOODLE)
       // ==========================================
       {
         id: 2,
         category: "algebra",
         title: "Álgebra Relacional — Projeção de Atributos",
-        statement: "Construa a expressão da Álgebra Relacional que faça: <strong>Apresentar o nome e a cidade de todos os clientes</strong>:",
-        type: "slots",
+        statement: "Construir a expressão algébrica que faça: <strong>Apresentar o nome e a cidade de todos os cliente</strong>:",
+        type: "algebra-formula",
+        layoutType: "moodle-q2-linear",
         slots: [
           { id: "q2-1", correct: "π", label: "Operador" },
           { id: "q2-2", correct: "(", label: "(" },
-          { id: "q2-3", correct: "nome", label: "coluna 1" },
-          { id: "q2-4", correct: "cidade", label: "coluna 2" },
+          { id: "q2-3", correct: "Cliente", label: "Tabela" },
+          { id: "q2-4", correct: "nome", label: "Coluna 1" },
           { id: "q2-5", correct: ")", label: ")" },
-          { id: "q2-6", correct: "Cliente", label: "Tabela" }
+          { id: "q2-6", correct: "cidade", label: "Coluna 2" }
         ],
-        tokens: ["π", "(", "Cliente", "nome", ")", "cidade", "σ", "cor_preferida"],
-        feedback: "Expressão correta: π(nome, cidade)(Cliente). O operador Pi (π) projeta e isola apenas as colunas desejadas."
+        tokens: ["π", "(", "Cliente", "nome", ")", "cidade"],
+        feedback: "Fórmula correta: \\pi_{(nome, cidade)}(Cliente). O operador Pi (\\pi) projeta apenas as colunas especificadas, eliminando duplicatas."
       },
 
       // ==========================================
@@ -399,7 +482,8 @@
         category: "algebra",
         title: "Álgebra Relacional — Seleção com Disjunção (OU / ∨)",
         statement: "Monte a expressão algébrica para selecionar todos os clientes que moram em <strong>'Sorocaba' OU em 'Apiaí'</strong>:",
-        type: "slots",
+        type: "algebra-formula",
+        layoutType: "moodle-q3-or",
         slots: [
           { id: "q3-1", correct: "σ", label: "Op" },
           { id: "q3-2", correct: "(", label: "(" },
@@ -414,7 +498,7 @@
           { id: "q3-11", correct: "(CLIENTE)", label: "Tabela" }
         ],
         tokens: ["σ", "(", "cidade", "=", "'Sorocaba'", "∨", "∧", "'Apiaí'", ")", "(CLIENTE)", "π"],
-        feedback: "Expressão correta: σ(cidade = 'Sorocaba' ∨ cidade = 'Apiaí')(CLIENTE). O símbolo ∨ representa a disjunção lógica (OU)."
+        feedback: "Fórmula correta: \\sigma_{(cidade = 'Sorocaba' \\vee cidade = 'Apiaí')}(CLIENTE). O símbolo \\vee representa a união/disjunção lógica."
       },
 
       // ==========================================
@@ -425,7 +509,8 @@
         category: "algebra",
         title: "Álgebra Relacional — Projeção com Junção Natural (⨝)",
         statement: "Escreva a expressão para projetar o <strong>Nome do Aluno</strong> e o <strong>Nome da Disciplina</strong> a partir da junção das tabelas Aluno, Matricula e Disciplina (Atividade Prática 1):",
-        type: "slots",
+        type: "algebra-formula",
+        layoutType: "moodle-q4-join",
         slots: [
           { id: "q4-1", correct: "π", label: "Op" },
           { id: "q4-2", correct: "Nome, NomeDisc", label: "Colunas" },
@@ -438,7 +523,7 @@
           { id: "q4-9", correct: ")", label: ")" }
         ],
         tokens: ["π", "Nome, NomeDisc", "(", "Aluno", "⨝", "Matricula", "Disciplina", ")", "σ", "Curso='Sistemas'"],
-        feedback: "Expressão correta: π Nome, NomeDisc (Aluno ⨝ Matricula ⨝ Disciplina). A junção (⨝ ou |X|) combina os registros compatíveis de chaves."
+        feedback: "Fórmula correta: \\pi_{Nome, NomeDisc}(Aluno \\bowtie Matricula \\bowtie Disciplina). A junção natural conecta as relações através das chaves correspondentes."
       },
 
       // ==========================================
@@ -448,101 +533,103 @@
         id: 5,
         category: "algebra",
         title: "Álgebra Relacional — Operação de Diferença (−)",
-        statement: "Monte a expressão que retorna os <strong>RAs dos alunos que NÃO estão matriculados em nenhuma disciplina</strong> (Diferença entre todos os alunos e matriculados):",
-        type: "slots",
+        statement: "Monte a expressão que retorna os <strong>RAs dos alunos que NÃO estão matriculados em nenhuma disciplina</strong> (Diferença entre todos os alunos e os matriculados):",
+        type: "algebra-formula",
+        layoutType: "moodle-q5-diff",
         slots: [
           { id: "q5-1", correct: "π_RA(Aluno)", label: "Todos Alunos" },
           { id: "q5-2", correct: "−", label: "Diferença" },
           { id: "q5-3", correct: "π_RA(Matricula)", label: "Matriculados" }
         ],
         tokens: ["π_RA(Aluno)", "−", "π_RA(Matricula)", "∪", "⨝", "σ_RA(Aluno)"],
-        feedback: "Expressão correta: π_RA(Aluno) − π_RA(Matricula). A operação de diferença exclui do conjunto de todos os alunos aqueles com matrícula ativa."
+        feedback: "Fórmula correta: \\pi_{RA}(Aluno) - \\pi_{RA}(Matricula). A diferença isola os elementos exclusivos do primeiro conjunto."
       },
 
       // ==========================================
-      // QUESTÃO 6: MODELO CONCEITUAL - DER CLÍNICA MÉDICA
+      // QUESTÃO 6: MODELO CONCEITUAL - DER CLÍNICA MÉDICA (VETORIAL AUTÊNTICO PETER CHEN)
       // ==========================================
       {
         id: 6,
         category: "der",
         title: "Modelo Conceitual (DER) — Clínica Médica (Moodle Oficial)",
-        statement: "Complete o DER da Clínica Médica posicionando as Entidades, Chaves Primárias Identificadoras e Relacionamentos corretos:",
-        type: "der-medica",
+        statement: "<strong>Completar o DER?</strong> Posicione as Entidades (Retângulos), Chaves Identificadoras (Elipses), Relacionamentos (Losangos) e Cardinalidades no diagrama vetorial oficial:",
+        type: "der-peterchen-medica",
         slots: [
-          { id: "q6-paciente", correct: "Paciente", label: "Entidade Sup Esq" },
+          { id: "q6-paciente", correct: "Paciente", label: "Entidade Paciente" },
           { id: "q6-codpac", correct: "codPaciente", label: "PK Paciente" },
-          { id: "q6-medico", correct: "Medico", label: "Entidade Sup Dir" },
+          { id: "q6-medico", correct: "Medico", label: "Entidade Medico" },
           { id: "q6-codmed", correct: "codMedico", label: "PK Medico" },
           { id: "q6-atende", correct: "atende", label: "Relacionamento" },
-          { id: "q6-consulta", correct: "Consulta", label: "Entidade Central" },
+          { id: "q6-consulta", correct: "Consulta", label: "Entidade Consulta" },
           { id: "q6-codcon", correct: "codConsulta", label: "PK Consulta" },
-          { id: "q6-c1", correct: "1", label: "Card Pac" },
-          { id: "q6-cN", correct: "N", label: "Card Con" }
+          { id: "q6-c1", correct: "1", label: "Card 1" },
+          { id: "q6-cN", correct: "N", label: "Card N" }
         ],
         tokens: ["Paciente", "codPaciente", "Consulta", "codConsulta", "atende", "Medico", "codMedico", "N", "1"],
-        feedback: "Diagrama completo: Paciente (codPaciente) 1 --- tem --- N Consulta (codConsulta) N --- atende --- 1 Medico (codMedico)."
+        feedback: "DER Oficial: Paciente(codPaciente PK) [1] --- <tem> --- [N] Consulta(codConsulta PK) [N] --- <atende> --- [1] Medico(codMedico PK)."
       },
 
       // ==========================================
-      // QUESTÃO 7: MODELO CONCEITUAL - DER BIBLIOTECA
+      // QUESTÃO 7: MODELO CONCEITUAL - DER SISTEMA DE BIBLIOTECA (ATIVIDADE 4)
       // ==========================================
       {
         id: 7,
         category: "der",
         title: "Modelo Conceitual (DER) — Sistema de Biblioteca (Atividade 4)",
-        statement: "Complete os componentes do DER da Biblioteca relacionando Livros, Autores e Assuntos:",
-        type: "slots",
+        statement: "Complete o Diagrama Entidade-Relacionamento do sistema de Biblioteca (Livro, Autor e Assunto com cardinalidades N:N):",
+        type: "der-peterchen-biblioteca",
         slots: [
-          { id: "q7-1", correct: "LIVRO", label: "Entidade 1" },
-          { id: "q7-2", correct: "ISBN", label: "PK Livro" },
-          { id: "q7-3", correct: "ESCREVE", label: "Relacionamento" },
-          { id: "q7-4", correct: "N:N", label: "Cardinalidade" },
-          { id: "q7-5", correct: "AUTOR", label: "Entidade 2" },
-          { id: "q7-6", correct: "Codigo", label: "PK Autor" }
+          { id: "q7-livro", correct: "LIVRO", label: "Entidade Livro" },
+          { id: "q7-isbn", correct: "ISBN", label: "PK Livro" },
+          { id: "q7-escreve", correct: "ESCREVE", label: "Relacionamento" },
+          { id: "q7-autor", correct: "AUTOR", label: "Entidade Autor" },
+          { id: "q7-codautor", correct: "Codigo", label: "PK Autor" },
+          { id: "q7-cardN1", correct: "N", label: "Card N" },
+          { id: "q7-cardN2", correct: "N", label: "Card N" }
         ],
-        tokens: ["LIVRO", "ISBN", "ESCREVE", "N:N", "AUTOR", "Codigo", "1:1", "ASSUNTO", "Descricao"],
-        feedback: "No sistema de biblioteca: LIVRO (ISBN) possui relacionamento N:N com AUTOR (Codigo) através da ação ESCREVE."
+        tokens: ["LIVRO", "ISBN", "ESCREVE", "N", "AUTOR", "Codigo", "1", "ASSUNTO", "Descricao"],
+        feedback: "DER da Biblioteca: LIVRO (ISBN) conecta-se a AUTOR (Codigo) através do relacionamento ESCREVE com cardinalidade N:N."
       },
 
       // ==========================================
-      // QUESTÃO 8: MODELO CONCEITUAL - DER VENDAS / E-COMMERCE
+      // QUESTÃO 8: MODELO CONCEITUAL - DER SISTEMA DE VENDAS (ATIVIDADE 3)
       // ==========================================
       {
         id: 8,
         category: "der",
-        title: "Modelo Conceitual (DER) — Sistema de Vendas (Atividade 3)",
-        statement: "Monte a hierarquia de cardinalidades e entidades do sistema de pedidos e vendas:",
-        type: "slots",
+        title: "Modelo Conceitual (DER) — Sistema de Vendas & E-Commerce (Atividade 3)",
+        statement: "Complete o fluxo de vendas do Modelo Conceitual posicionando Entidades e Cardinalidades na ordem correta:",
+        type: "der-peterchen-vendas",
         slots: [
-          { id: "q8-1", correct: "Cliente", label: "Entidade 1" },
-          { id: "q8-2", correct: "Realiza", label: "Rel 1" },
-          { id: "q8-3", correct: "(1,N)", label: "Card 1" },
-          { id: "q8-4", correct: "Venda", label: "Entidade 2" },
-          { id: "q8-5", correct: "Possui", label: "Rel 2" },
-          { id: "q8-6", correct: "ItemVenda", label: "Entidade 3" }
+          { id: "q8-cliente", correct: "Cliente", label: "Entidade Cliente" },
+          { id: "q8-card1", correct: "1", label: "Card 1" },
+          { id: "q8-venda", correct: "Venda", label: "Entidade Venda" },
+          { id: "q8-cardN", correct: "N", label: "Card N" },
+          { id: "q8-itemvenda", correct: "ItemVenda", label: "Entidade ItemVenda" },
+          { id: "q8-produto", correct: "Produto", label: "Entidade Produto" }
         ],
-        tokens: ["Cliente", "Realiza", "(1,N)", "Venda", "Possui", "ItemVenda", "Produto", "(1,1)"],
-        feedback: "Cliente (1) Realiza (N) Venda; Venda (1) Possui (N) ItemVenda."
+        tokens: ["Cliente", "1", "Venda", "N", "ItemVenda", "Produto", "Fabricante", "0"],
+        feedback: "Hierarquia conceitual: Cliente (1) Realiza (N) Venda; Venda (1) Possui (N) ItemVenda (N) Contém (1) Produto."
       },
 
       // ==========================================
-      // QUESTÃO 9: MAPEAMENTO LÓGICO - REGRAS 1:N
+      // QUESTÃO 9: MAPEAMENTO LÓGICO - ESQUEMA DE TABELA 1:N
       // ==========================================
       {
         id: 9,
         category: "logico",
-        title: "Mapeamento Lógico Relacional — Regra de Chave Estrangeira 1:N",
-        statement: "No mapeamento do relacionamento 1:N entre <strong>Paciente (1)</strong> e <strong>Consulta (N)</strong>, como deve ser estruturada a tabela `tblConsulta` no Modelo Lógico?",
-        type: "slots",
+        title: "Mapeamento Lógico Relacional — Estrutura de Tabela com FK",
+        statement: "Complete a definição da tabela lógica `tblConsulta` originada do relacionamento 1:N com Paciente e Médico:",
+        type: "logical-table",
+        tableName: "tblConsulta",
         slots: [
-          { id: "q9-1", correct: "idConsulta (PK)", label: "Chave Primária" },
-          { id: "q9-2", correct: "dtConsulta", label: "Data" },
-          { id: "q9-3", correct: "horario", label: "Hora" },
-          { id: "q9-4", correct: "idPaciente (FK)", label: "Chave Estrangeira" },
-          { id: "q9-5", correct: "idMedico (FK)", label: "Chave Estrangeira" }
+          { id: "q9-pk", correct: "idConsulta (PK)", label: "Chave Primária" },
+          { id: "q9-fk1", correct: "idPaciente (FK)", label: "Chave Estrangeira 1" },
+          { id: "q9-fk2", correct: "idMedico (FK)", label: "Chave Estrangeira 2" },
+          { id: "q9-attr", correct: "dtConsulta", label: "Data" }
         ],
-        tokens: ["idConsulta (PK)", "dtConsulta", "horario", "idPaciente (FK)", "idMedico (FK)", "idPaciente (PK)", "CRM"],
-        feedback: "Em relacionamentos 1:N, a Chave Primária da entidade do lado '1' migra como Chave Estrangeira (FK) para a tabela do lado 'N'."
+        tokens: ["idConsulta (PK)", "idPaciente (FK)", "idMedico (FK)", "dtConsulta", "CRM", "idPaciente (PK)"],
+        feedback: "Na tabela tblConsulta: idConsulta é a Chave Primária (PK), e idPaciente e idMedico são Chaves Estrangeiras (FKs) migradas das entidades do lado 1."
       },
 
       // ==========================================
@@ -552,26 +639,27 @@
         id: 10,
         category: "logico",
         title: "Mapeamento Lógico Relacional — Tabela Associativa N:N",
-        statement: "Ao mapear o relacionamento N:N entre <strong>Livro</strong> e <strong>Autor</strong>, cria-se a tabela associativa `tblLivroAutor`. Monte os campos que compõem sua Chave Primária Composta:",
-        type: "slots",
+        statement: "Monte a Chave Primária Composta da tabela associativa `tblLivroAutor` originada do relacionamento N:N:",
+        type: "logical-table",
+        tableName: "tblLivroAutor",
         slots: [
-          { id: "q10-1", correct: "ISBN (PK/FK)", label: "Chave 1" },
-          { id: "q10-2", correct: "idAutor (PK/FK)", label: "Chave 2" },
-          { id: "q10-3", correct: "dtParticipacao", label: "Atributo Rel" }
+          { id: "q10-pk1", correct: "ISBN (PK/FK)", label: "Chave 1" },
+          { id: "q10-pk2", correct: "idAutor (PK/FK)", label: "Chave 2" },
+          { id: "q10-attr", correct: "dtParticipacao", label: "Atributo" }
         ],
         tokens: ["ISBN (PK/FK)", "idAutor (PK/FK)", "dtParticipacao", "idLivroAutor (PK)", "NomeAutor"],
-        feedback: "A tabela associativa originada de um relacionamento N:N possui Chave Primária Composta pelas PKs das duas tabelas originais atuando como FKs."
+        feedback: "Tabelas associativas originadas de relacionamentos N:N possuem Chave Primária Composta formada pelas PKs de ambas as entidades associadas (atuando simultaneamente como FKs)."
       },
 
       // ==========================================
-      // QUESTÃO 11: CONSTRUTOR DE TABELA RELACIONAL
+      // QUESTÃO 11: CONSTRUTOR DE TABELA RELACIONAL SQL
       // ==========================================
       {
         id: 11,
         category: "logico",
-        title: "Mapeamento Lógico — Definição de Tipos e Restrições de Tabela",
-        statement: "Monte a especificação correta para a tabela `tblCliente` conforme a Atividade Prática 3 (Tipos SQL e Restrições):",
-        type: "slots",
+        title: "Mapeamento Lógico — Tipagem e Restrições de Integridade",
+        statement: "Complete a especificação de colunas e restrições da tabela `tblCliente` conforme a Atividade Prática 3:",
+        type: "slots-grid",
         slots: [
           { id: "q11-1", correct: "idCliente", label: "Campo 1" },
           { id: "q11-2", correct: "INT (PK) NOT NULL", label: "Tipo 1" },
@@ -581,45 +669,44 @@
           { id: "q11-6", correct: "VARCHAR(14) NOT NULL", label: "Tipo 3" }
         ],
         tokens: ["idCliente", "INT (PK) NOT NULL", "nmCliente", "VARCHAR(100) NOT NULL", "cpf", "VARCHAR(14) NOT NULL", "FLOAT", "NULL"],
-        feedback: "Definição padrão: idCliente INT (PK) NOT NULL, nmCliente VARCHAR(100) NOT NULL, cpf VARCHAR(14) NOT NULL."
+        feedback: "Esquema correto: idCliente INT (PK) NOT NULL, nmCliente VARCHAR(100) NOT NULL, cpf VARCHAR(14) NOT NULL."
       },
 
       // ==========================================
-      // QUESTÃO 12: TEORIA - DADO, INFORMAÇÃO E CONHECIMENTO
+      // QUESTÃO 12: TEORIA - PIRÂMIDE DO CONHECIMENTO
       // ==========================================
       {
         id: 12,
         category: "teoria",
-        title: "Teoria SGBD — Classificação da Pirâmide do Conhecimento",
-        statement: "Classifique cada um dos 5 itens abaixo em <strong>Dado, Informação ou Conhecimento</strong> (Slide 6 - Aula 01):",
+        title: "Teoria SGBD — Dado, Informação e Conhecimento (Moodle Oficial)",
+        statement: "Selecione a classificação correta (<strong>Dado, Informação ou Conhecimento</strong>) para cada uma das sentenças:",
         type: "dropdowns",
         items: [
           { id: "q12-1", text: "37.5", correct: "Dado", options: ["Dado", "Informação", "Conhecimento"] },
           { id: "q12-2", text: "Temperatura de 37.5°C", correct: "Informação", options: ["Dado", "Informação", "Conhecimento"] },
           { id: "q12-3", text: "Paciente pode estar com febre e necessita de protocolo médico", correct: "Conhecimento", options: ["Dado", "Informação", "Conhecimento"] },
           { id: "q12-4", text: "Sorocaba", correct: "Dado", options: ["Dado", "Informação", "Conhecimento"] },
-          { id: "q12-5", text: "Identificação de que a maioria dos clientes de Sorocaba prefere a cor vermelha", correct: "Conhecimento", options: ["Dado", "Informação", "Conhecimento"] }
+          { id: "q12-5", text: "Tendência de preferência da cor vermelha na cidade de Sorocaba", correct: "Conhecimento", options: ["Dado", "Informação", "Conhecimento"] }
         ],
-        feedback: "37.5 e Sorocaba são Dados brutos. Temperatura contextualizada é Informação. Análise para tomada de decisão é Conhecimento."
+        feedback: "Dado = número/símbolo bruto isolado; Informação = dado com contexto e significado; Conhecimento = informação analisada para tomada de decisão."
       },
 
       // ==========================================
-      // QUESTÃO 13: TEORIA - SIMBOLOGIA DO MER (PETER CHEN)
+      // QUESTÃO 13: TEORIA - SÍMBOLOS DO MER (PETER CHEN)
       // ==========================================
       {
         id: 13,
         category: "teoria",
-        title: "Simbologia MER/DER — Identificação das Formas Geométricas",
-        statement: "Selecione a função correspondente de cada símbolo gráfico da notação oficial do Modelo Entidade-Relacionamento:",
-        type: "dropdowns",
+        title: "Simbologia MER/DER — Identificação das Formas Geométricas (Moodle Oficial)",
+        statement: "Associe cada símbolo gráfico da notação do Modelo Entidade-Relacionamento à sua respectiva função:",
+        type: "dropdowns-with-shapes",
         items: [
-          { id: "q13-1", text: "Retângulo (ex: Paciente, Médico, Produto)", correct: "Entidade", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
-          { id: "q13-2", text: "Elipse / Oval Simples (ex: dtNascimento, Nome)", correct: "Atributo", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
-          { id: "q13-3", text: "Elipse com Texto Sublinhado (ex: codPaciente, ISBN)", correct: "Chave Primária (Identificador)", options: ["Chave Primária (Identificador)", "Atributo Multivalorado", "Atributo Derivado", "Entidade Fraca"] },
-          { id: "q13-4", text: "Losango (ex: tem, atende, realiza, compra)", correct: "Relacionamento", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
-          { id: "q13-5", text: "(1,1), (0,N), 1:N (Razão de ocorrências associadas)", correct: "Cardinalidade", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] }
+          { id: "q13-1", shape: "rectangle", text: "Retângulo (ex: Paciente, Médico, Produto)", correct: "Entidade", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
+          { id: "q13-2", shape: "ellipse", text: "Elipse / Oval Simples (ex: dtNascimento, Nome, CRM)", correct: "Atributo", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
+          { id: "q13-3", shape: "diamond", text: "Losango (ex: tem, atende, realiza, compra)", correct: "Relacionamento", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
+          { id: "q13-4", shape: "cardinality", text: "(1,1), (0,N), 1:N (Razão de ocorrências associadas)", correct: "Cardinalidade", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] }
         ],
-        feedback: "Retângulo = Entidade; Elipse = Atributo; Elipse Sublinhada = Chave Primária; Losango = Relacionamento; (1,N) = Cardinalidade."
+        feedback: "Retângulo = Entidade; Elipse = Atributo; Losango = Relacionamento; (1,N) = Cardinalidade."
       },
 
       // ==========================================
@@ -628,33 +715,33 @@
       {
         id: 14,
         category: "teoria",
-        title: "Simbologia DER — Atributos Multivalorados e Derivados",
-        statement: "Associe a representação gráfica especial ao seu significado conceitual:",
+        title: "Simbologia DER — Notações Especiais de Atributos",
+        statement: "Identifique o tipo de atributo de acordo com a sua representação visual no DER:",
         type: "dropdowns",
         items: [
-          { id: "q14-1", text: "Elipse Dupla (ex: Telefones do cliente)", correct: "Atributo Multivalorado", options: ["Atributo Multivalorado", "Atributo Derivado", "Atributo Composto", "Chave Primária"] },
-          { id: "q14-2", text: "Elipse Tracejada (ex: Idade calculada a partir da Data de Nascimento)", correct: "Atributo Derivado", options: ["Atributo Multivalorado", "Atributo Derivado", "Atributo Composto", "Chave Primária"] },
-          { id: "q14-3", text: "Elipse com ramificações (ex: Endereço subdividido em Rua, Número, Bairro, CEP)", correct: "Atributo Composto", options: ["Atributo Multivalorado", "Atributo Derivado", "Atributo Composto", "Chave Primária"] },
-          { id: "q14-4", text: "Retângulo Duplo", correct: "Entidade Fraca", options: ["Entidade Fraca", "Entidade Associativa", "Relacionamento N:N", "Chave Composta"] }
+          { id: "q14-1", text: "Elipse Dupla (ex: Telefones de um cliente)", correct: "Atributo Multivalorado", options: ["Atributo Multivalorado", "Atributo Derivado", "Atributo Composto", "Chave Primária"] },
+          { id: "q14-2", text: "Elipse Tracejada (ex: Idade calculada da Data de Nascimento)", correct: "Atributo Derivado", options: ["Atributo Multivalorado", "Atributo Derivado", "Atributo Composto", "Chave Primária"] },
+          { id: "q14-3", text: "Elipse com texto sublinhado (ex: codPaciente, ISBN)", correct: "Chave Primária (Identificador)", options: ["Chave Primária (Identificador)", "Atributo Multivalorado", "Atributo Derivado", "Entidade Fraca"] },
+          { id: "q14-4", text: "Elipse subdividida em ramificações (ex: Endereço)", correct: "Atributo Composto", options: ["Atributo Multivalorado", "Atributo Derivado", "Atributo Composto", "Chave Primária"] }
         ],
-        feedback: "Elipse dupla = Multivalorado; Elipse tracejada = Derivado; Elipse ramificada = Composto; Retângulo duplo = Entidade Fraca."
+        feedback: "Elipse dupla = Multivalorado; Elipse tracejada = Derivado; Elipse sublinhada = PK; Elipse ramificada = Composto."
       },
 
       // ==========================================
-      // QUESTÃO 15: TEORIA - REGRAS DE INTEGRIDADE RELACIONAL
+      // QUESTÃO 15: TEORIA - REGRAS DE INTEGRIDADE
       // ==========================================
       {
         id: 15,
         category: "teoria",
-        title: "Teoria SGBD — Regras de Integridade de Banco de Dados",
+        title: "Teoria SGBD — Regras de Integridade Relacional",
         statement: "Associe a regra de integridade à sua respectiva definição oficial:",
         type: "dropdowns",
         items: [
-          { id: "q15-1", text: "Nenhum valor da Chave Primária (PK) pode ser nulo (NULL) e deve ser unívoco.", correct: "Integridade de Entidade", options: ["Integridade de Entidade", "Integridade Referencial", "Integridade de Domínio", "Integridade Vazia"] },
-          { id: "q15-2", text: "O valor de uma Chave Estrangeira (FK) deve coincidir com uma Chave Primária existente na tabela referenciada ou ser nulo.", correct: "Integridade Referencial", options: ["Integridade de Entidade", "Integridade Referencial", "Integridade de Domínio", "Integridade Vazia"] },
-          { id: "q15-3", text: "Os valores de uma coluna devem pertencer ao conjunto de valores permitidos pelo seu tipo de dado.", correct: "Integridade de Domínio", options: ["Integridade de Entidade", "Integridade Referencial", "Integridade de Domínio", "Integridade Vazia"] }
+          { id: "q15-1", text: "Nenhum valor da Chave Primária (PK) pode ser nulo (NULL) e deve ser único na tabela.", correct: "Integridade de Entidade", options: ["Integridade de Entidade", "Integridade Referencial", "Integridade de Domínio", "Integridade Física"] },
+          { id: "q15-2", text: "O valor de uma Chave Estrangeira (FK) deve coincidir com uma Chave Primária existente na tabela referenciada ou ser nulo.", correct: "Integridade Referencial", options: ["Integridade de Entidade", "Integridade Referencial", "Integridade de Domínio", "Integridade Física"] },
+          { id: "q15-3", text: "Os valores de uma coluna devem pertencer ao conjunto de valores e tipo permitidos.", correct: "Integridade de Domínio", options: ["Integridade de Entidade", "Integridade Referencial", "Integridade de Domínio", "Integridade Física"] }
         ],
-        feedback: "Integridade de Entidade = PK não nula/única. Integridade Referencial = FK válida. Integridade de Domínio = tipo/faixa de valores válidos."
+        feedback: "Integridade de Entidade assegura PK não nula e única. Integridade Referencial assegura FKs válidas."
       }
     ];
 
@@ -685,7 +772,6 @@
       if (cat === "resumo") {
         document.getElementById("questions-wrapper").classList.add("hidden");
         document.getElementById("moodle-navigator-container").classList.add("hidden");
-        document.getElementById("instruction-banner").classList.add("hidden");
         document.getElementById("final-result-card").classList.add("hidden");
         document.getElementById("super-resumo-section").classList.remove("hidden");
         return;
@@ -694,12 +780,9 @@
       document.getElementById("super-resumo-section").classList.add("hidden");
       document.getElementById("questions-wrapper").classList.remove("hidden");
       document.getElementById("moodle-navigator-container").classList.remove("hidden");
-      document.getElementById("instruction-banner").classList.remove("hidden");
       document.getElementById("final-result-card").classList.add("hidden");
 
       renderNavButtons();
-      
-      // Go to first matching question
       const firstMatching = questionsBank.find(q => cat === "todas" || q.category === cat);
       if (firstMatching) {
         goToQuestion(firstMatching.id);
@@ -744,26 +827,26 @@
       if (targetCard) targetCard.classList.remove("hidden");
 
       renderNavButtons();
-      window.scrollTo({ top: 100, behavior: "smooth" });
+      window.scrollTo({ top: 120, behavior: "smooth" });
     }
 
     function renderAllQuestions() {
       const wrapper = document.getElementById("questions-wrapper");
       wrapper.innerHTML = "";
 
-      questionsBank.forEach((q, idx) => {
+      questionsBank.forEach((q) => {
         const card = document.createElement("div");
         card.id = `q-card-${q.id}`;
-        card.className = `question-card ${q.id === 1 ? "" : "hidden"} bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4`;
+        card.className = `question-card ${q.id === 1 ? "" : "hidden"} bg-white dark:bg-slate-900 p-4 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5`;
 
-        // Card Header
+        // Card Header (Moodle Style)
         let cardHtml = `
-          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
             <div>
               <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Questão ${q.id} de ${questionsBank.length}</span>
-              <p class="text-xs text-slate-400 font-medium">Vale ${(10 / questionsBank.length).toFixed(2).replace(".", ",")} pontos</p>
+              <p class="text-xs text-slate-400 font-medium">Vale ${(10 / questionsBank.length).toFixed(2).replace(".", ",")} ponto(s)</p>
             </div>
-            <span class="text-[11px] font-semibold px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-300">
+            <span class="text-[11px] font-semibold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-300">
               ${q.title}
             </span>
           </div>
@@ -775,21 +858,235 @@
 
         if (q.tableContext) {
           cardHtml += `
-            <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl max-w-lg">
+            <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-2xl max-w-xl mx-auto shadow-sm">
+              <div class="bg-slate-800 text-white text-[11px] font-bold px-3 py-1 text-center">Tabela: CLIENTE</div>
               ${q.tableContext}
             </div>
           `;
         }
 
-        // SLOTS TYPE
-        if (q.type === "slots") {
+        // ==========================================
+        // 1. ALGEBRA FORMULA LAYOUTS (MATCHING MOODLE SCREENSHOT)
+        // ==========================================
+        if (q.type === "algebra-formula") {
+          let layoutInnerHtml = "";
+
+          if (q.layoutType === "moodle-q1-grid") {
+            layoutInnerHtml = `
+              <div class="space-y-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span class="text-xs font-bold text-slate-600 dark:text-slate-300 block">Construir Expressão:</span>
+                
+                <!-- Main Operator Slot -->
+                <div>
+                  <div id="slot-q1-op" data-correct="σ" class="moodle-slot w-12 h-10 text-base font-serif" onclick="handleSlotClick('q1-op')"></div>
+                </div>
+
+                <!-- Subscript Condition Slots (2 Rows) -->
+                <div class="pl-6 space-y-2 border-l-2 border-slate-300 dark:border-slate-700">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <div id="slot-q1-c1" data-correct="(" class="moodle-slot w-8 h-9" onclick="handleSlotClick('q1-c1')"></div>
+                    <div id="slot-q1-c2" data-correct="sexo" class="moodle-slot min-w-[56px] h-9" onclick="handleSlotClick('q1-c2')"></div>
+                    <div id="slot-q1-c3" data-correct="=" class="moodle-slot w-8 h-9" onclick="handleSlotClick('q1-c3')"></div>
+                    <div id="slot-q1-c4" data-correct="'F'" class="moodle-slot min-w-[44px] h-9" onclick="handleSlotClick('q1-c4')"></div>
+                    <div id="slot-q1-c5" data-correct="^" class="moodle-slot w-8 h-9 text-base font-bold" onclick="handleSlotClick('q1-c5')"></div>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <div id="slot-q1-c6" data-correct="cor_preferida" class="moodle-slot min-w-[110px] h-9" onclick="handleSlotClick('q1-c6')"></div>
+                    <div id="slot-q1-c7" data-correct="=" class="moodle-slot w-8 h-9" onclick="handleSlotClick('q1-c7')"></div>
+                    <div id="slot-q1-c8" data-correct="'Azul'" class="moodle-slot min-w-[56px] h-9" onclick="handleSlotClick('q1-c8')"></div>
+                    <div id="slot-q1-c9" data-correct=")" class="moodle-slot w-8 h-9" onclick="handleSlotClick('q1-c9')"></div>
+                  </div>
+                </div>
+
+                <!-- Target Relation Slot -->
+                <div class="pt-1">
+                  <div id="slot-q1-target" data-correct="(CLIENTE)" class="moodle-slot min-w-[90px] h-10" onclick="handleSlotClick('q1-target')"></div>
+                </div>
+              </div>
+            `;
+          } else {
+            // Standard Linear Formula Slots
+            let slotsRow = "";
+            q.slots.forEach(s => {
+              slotsRow += `
+                <div id="slot-${s.id}" data-correct="${s.correct}" class="moodle-slot" onclick="handleSlotClick('${s.id}')"></div>
+              `;
+            });
+            layoutInnerHtml = `
+              <div class="space-y-2.5 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span class="text-xs font-bold text-slate-600 dark:text-slate-300 block">Construir Expressão:</span>
+                <div class="flex flex-wrap items-center gap-2">
+                  ${slotsRow}
+                </div>
+              </div>
+            `;
+          }
+
+          // Tokens Bank (Moodle Badge Style)
+          let tokensHtml = "";
+          q.tokens.forEach((tok, tIdx) => {
+            tokensHtml += `
+              <button onclick="selectTokenForDrop('${tok}', 'btn-tok-${q.id}-${tIdx}')" 
+                      id="btn-tok-${q.id}-${tIdx}" 
+                      class="moodle-token">
+                ${tok}
+              </button>
+            `;
+          });
+
+          cardHtml += `
+            ${layoutInnerHtml}
+            <div class="pt-2">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-xs font-bold text-slate-500">Banco de Peças (Clique para selecionar e depois toque no espaço):</span>
+                <button onclick="clearQuestionSlots(${q.id})" class="text-[11px] text-slate-400 hover:text-rose-500 font-bold transition">
+                  <i class="fa-solid fa-eraser mr-1"></i> Limpar Espaços
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                ${tokensHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        // ==========================================
+        // 2. PETER CHEN DER DIAGRAM LAYOUTS (EXACT MOODLE VECTOR DIAGRAM)
+        // ==========================================
+        if (q.type === "der-peterchen-medica") {
+          let tokensHtml = "";
+          q.tokens.forEach((tok, tIdx) => {
+            tokensHtml += `
+              <button onclick="selectTokenForDrop('${tok}', 'btn-tok-${q.id}-${tIdx}')" 
+                      id="btn-tok-${q.id}-${tIdx}" 
+                      class="moodle-token">
+                ${tok}
+              </button>
+            `;
+          });
+
+          cardHtml += `
+            <!-- AUTHENTIC PETER CHEN DER DIAGRAM CONTAINER -->
+            <div class="relative bg-white dark:bg-slate-900 p-4 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-inner overflow-x-auto min-w-[320px]">
+              
+              <!-- SVG CONNECTING LINES (Clean geometric vector diagram) -->
+              <svg class="absolute inset-0 w-full h-full pointer-events-none stroke-slate-400 dark:stroke-slate-600" style="z-index: 1;">
+                <!-- Lines from Paciente to Attributes -->
+                <line x1="25%" y1="120" x2="15%" y2="55" stroke-width="2" />
+                <line x1="25%" y1="120" x2="25%" y2="55" stroke-width="2" />
+                <line x1="25%" y1="120" x2="35%" y2="55" stroke-width="2" />
+
+                <!-- Lines from Medico to Attributes -->
+                <line x1="75%" y1="120" x2="65%" y2="55" stroke-width="2" />
+                <line x1="75%" y1="120" x2="75%" y2="55" stroke-width="2" />
+                <line x1="75%" y1="120" x2="85%" y2="55" stroke-width="2" />
+
+                <!-- Line Paciente to 'tem' Relationship -->
+                <line x1="25%" y1="150" x2="25%" y2="240" stroke-width="2" />
+                <line x1="25%" y1="240" x2="40%" y2="240" stroke-width="2" />
+
+                <!-- Line Medico to 'atende' Relationship -->
+                <line x1="75%" y1="150" x2="75%" y2="240" stroke-width="2" />
+                <line x1="75%" y1="240" x2="60%" y2="240" stroke-width="2" />
+
+                <!-- Lines to Consulta -->
+                <line x1="40%" y1="240" x2="45%" y2="240" stroke-width="2" />
+                <line x1="60%" y1="240" x2="55%" y2="240" stroke-width="2" />
+
+                <!-- Lines from Consulta to its attributes -->
+                <line x1="50%" y1="260" x2="35%" y2="330" stroke-width="2" />
+                <line x1="50%" y1="260" x2="50%" y2="330" stroke-width="2" />
+                <line x1="50%" y1="260" x2="65%" y2="330" stroke-width="2" />
+              </svg>
+
+              <!-- DIAGRAM HTML OVERLAY NODES (z-index: 2) -->
+              <div class="relative space-y-12" style="z-index: 2;">
+                
+                <!-- TOP ROW: Attributes of Paciente and Medico -->
+                <div class="grid grid-cols-2 gap-8 text-center">
+                  <!-- Paciente Attributes -->
+                  <div class="flex justify-center items-center gap-2">
+                    <span class="der-attribute">dtNascimento</span>
+                    <div id="slot-q6-codpac" data-correct="codPaciente" class="moodle-slot der-attribute min-w-[90px] border-dashed underline" onclick="handleSlotClick('q6-codpac')"></div>
+                    <span class="der-attribute">Nome Paciente</span>
+                  </div>
+                  <!-- Medico Attributes -->
+                  <div class="flex justify-center items-center gap-2">
+                    <span class="der-attribute">CRM</span>
+                    <div id="slot-q6-codmed" data-correct="codMedico" class="moodle-slot der-attribute min-w-[90px] border-dashed underline" onclick="handleSlotClick('q6-codmed')"></div>
+                    <span class="der-attribute">Nome Medico</span>
+                  </div>
+                </div>
+
+                <!-- SECOND ROW: Paciente and Medico Entity Rectangles -->
+                <div class="grid grid-cols-2 gap-8 text-center">
+                  <!-- Paciente Entity -->
+                  <div class="flex flex-col items-center">
+                    <div id="slot-q6-paciente" data-correct="Paciente" class="moodle-slot der-entity w-44 h-12 text-sm uppercase" onclick="handleSlotClick('q6-paciente')">
+                      [ Entidade Paciente ]
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-2 text-xs font-bold text-slate-500">
+                      Cardinalidade: <div id="slot-q6-c1" data-correct="1" class="moodle-slot w-7 h-7 p-0 text-xs" onclick="handleSlotClick('q6-c1')"></div>
+                    </div>
+                  </div>
+
+                  <!-- Medico Entity -->
+                  <div class="flex flex-col items-center">
+                    <div id="slot-q6-medico" data-correct="Medico" class="moodle-slot der-entity w-44 h-12 text-sm uppercase" onclick="handleSlotClick('q6-medico')">
+                      [ Entidade Medico ]
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-2 text-xs font-bold text-slate-500">
+                      Relacionamento: <div id="slot-q6-atende" data-correct="atende" class="moodle-slot min-w-[70px] h-8 text-xs font-bold" onclick="handleSlotClick('q6-atende')"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- THIRD ROW: Central Consulta Entity -->
+                <div class="max-w-md mx-auto flex flex-col items-center space-y-4">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                    Cardinalidade Consulta: <div id="slot-q6-cN" data-correct="N" class="moodle-slot w-7 h-7 p-0 text-xs" onclick="handleSlotClick('q6-cN')"></div>
+                  </div>
+
+                  <div id="slot-q6-consulta" data-correct="Consulta" class="moodle-slot der-entity w-52 h-12 text-sm uppercase" onclick="handleSlotClick('q6-consulta')">
+                    [ Entidade Consulta ]
+                  </div>
+
+                  <div class="flex justify-center items-center gap-2 pt-1">
+                    <div id="slot-q6-codcon" data-correct="codConsulta" class="moodle-slot der-attribute min-w-[90px] border-dashed underline" onclick="handleSlotClick('q6-codcon')"></div>
+                    <span class="der-attribute">dtConsulta</span>
+                    <span class="der-attribute">Horário</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Draggable Tokens Bank -->
+            <div class="pt-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-500">Banco de Peças (Clique para selecionar):</span>
+                <button onclick="clearQuestionSlots(${q.id})" class="text-[11px] text-slate-400 hover:text-rose-500 font-bold transition">
+                  <i class="fa-solid fa-eraser mr-1"></i> Limpar Espaços
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                ${tokensHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        // ==========================================
+        // 3. PETER CHEN DER BIBLIOTECA & VENDAS (Q7, Q8)
+        // ==========================================
+        if (q.type === "der-peterchen-biblioteca" || q.type === "der-peterchen-vendas") {
           let slotsHtml = "";
           q.slots.forEach(s => {
             slotsHtml += `
-              <div id="slot-${s.id}" 
-                   data-correct="${s.correct}" 
-                   class="dropzone px-2.5 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm bg-white dark:bg-slate-900 shadow-inner" 
-                   onclick="handleSlotClick('${s.id}')"></div>
+              <div class="flex flex-col items-center p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span class="text-[10px] text-slate-400 font-bold uppercase mb-1.5">${s.label}</span>
+                <div id="slot-${s.id}" data-correct="${s.correct}" class="moodle-slot min-w-[80px]" onclick="handleSlotClick('${s.id}')"></div>
+              </div>
             `;
           });
 
@@ -798,24 +1095,20 @@
             tokensHtml += `
               <button onclick="selectTokenForDrop('${tok}', 'btn-tok-${q.id}-${tIdx}')" 
                       id="btn-tok-${q.id}-${tIdx}" 
-                      class="draggable-token px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 shadow-sm">
+                      class="moodle-token">
                 ${tok}
               </button>
             `;
           });
 
           cardHtml += `
-            <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
-              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Construir Expressão / Esquema:</span>
-              <div class="flex flex-wrap items-center gap-2">
-                ${slotsHtml}
-              </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+              ${slotsHtml}
             </div>
-
-            <div>
+            <div class="pt-2">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-semibold text-slate-500">Banco de Peças (Clique para selecionar):</span>
-                <button onclick="clearQuestionSlots(${q.id})" class="text-[11px] text-slate-400 hover:text-rose-500 font-semibold">
+                <span class="text-xs font-bold text-slate-500">Banco de Peças:</span>
+                <button onclick="clearQuestionSlots(${q.id})" class="text-[11px] text-slate-400 hover:text-rose-500 font-bold transition">
                   <i class="fa-solid fa-eraser mr-1"></i> Limpar Espaços
                 </button>
               </div>
@@ -826,76 +1119,40 @@
           `;
         }
 
-        // DER CLINICA MEDICA SPECIAL
-        if (q.type === "der-medica") {
+        // ==========================================
+        // 4. LOGICAL TABLES & SCHEMAS (Q9, Q10, Q11)
+        // ==========================================
+        if (q.type === "logical-table" || q.type === "slots-grid") {
+          let slotsHtml = "";
+          q.slots.forEach(s => {
+            slotsHtml += `
+              <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${s.label}:</span>
+                <div id="slot-${s.id}" data-correct="${s.correct}" class="moodle-slot min-w-[120px]" onclick="handleSlotClick('${s.id}')"></div>
+              </div>
+            `;
+          });
+
           let tokensHtml = "";
           q.tokens.forEach((tok, tIdx) => {
             tokensHtml += `
               <button onclick="selectTokenForDrop('${tok}', 'btn-tok-${q.id}-${tIdx}')" 
                       id="btn-tok-${q.id}-${tIdx}" 
-                      class="draggable-token px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 shadow-sm">
+                      class="moodle-token">
                 ${tok}
               </button>
             `;
           });
 
           cardHtml += `
-            <div class="bg-slate-50 dark:bg-slate-800/40 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-                <!-- Bloco Paciente -->
-                <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-                  <div class="flex justify-center gap-1.5">
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border">dtNasc</span>
-                    <div id="slot-q6-codpac" data-correct="codPaciente" class="dropzone min-w-[70px] h-7 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-full flex items-center justify-center font-bold text-[10px]" onclick="handleSlotClick('q6-codpac')"></div>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border">Nome</span>
-                  </div>
-                  <div id="slot-q6-paciente" data-correct="Paciente" class="dropzone h-10 border-2 border-dashed border-emerald-500 rounded-lg flex items-center justify-center font-bold text-xs bg-emerald-50/40 dark:bg-emerald-950/30" onclick="handleSlotClick('q6-paciente')">
-                    [ Entidade Paciente ]
-                  </div>
-                  <div class="flex justify-center items-center text-xs font-bold text-slate-500">
-                    Cardinalidade: 
-                    <div id="slot-q6-c1" data-correct="1" class="dropzone w-7 h-7 ml-1 border-2 border-dashed rounded flex items-center justify-center text-xs" onclick="handleSlotClick('q6-c1')"></div>
-                  </div>
-                </div>
-
-                <!-- Bloco Medico -->
-                <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-                  <div class="flex justify-center gap-1.5">
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border">CRM</span>
-                    <div id="slot-q6-codmed" data-correct="codMedico" class="dropzone min-w-[70px] h-7 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-full flex items-center justify-center font-bold text-[10px]" onclick="handleSlotClick('q6-codmed')"></div>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border">Nome</span>
-                  </div>
-                  <div id="slot-q6-medico" data-correct="Medico" class="dropzone h-10 border-2 border-dashed border-sky-500 rounded-lg flex items-center justify-center font-bold text-xs bg-sky-50/40 dark:bg-sky-950/30" onclick="handleSlotClick('q6-medico')">
-                    [ Entidade Medico ]
-                  </div>
-                  <div class="flex justify-center items-center text-xs font-bold text-slate-500">
-                    Relacionamento:
-                    <div id="slot-q6-atende" data-correct="atende" class="dropzone min-w-[60px] h-7 ml-1 border-2 border-dashed rounded flex items-center justify-center text-xs font-bold" onclick="handleSlotClick('q6-atende')"></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bloco Central Consulta -->
-              <div class="max-w-md mx-auto p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 text-center">
-                <div class="flex justify-center items-center gap-2 text-xs font-bold text-slate-500">
-                  Cardinalidade Consulta:
-                  <div id="slot-q6-cN" data-correct="N" class="dropzone w-7 h-7 border-2 border-dashed rounded flex items-center justify-center text-xs" onclick="handleSlotClick('q6-cN')"></div>
-                </div>
-                <div id="slot-q6-consulta" data-correct="Consulta" class="dropzone h-10 border-2 border-dashed border-purple-500 rounded-lg flex items-center justify-center font-bold text-xs bg-purple-50/40 dark:bg-purple-950/30" onclick="handleSlotClick('q6-consulta')">
-                  [ Entidade Consulta ]
-                </div>
-                <div class="flex justify-center gap-1.5">
-                  <div id="slot-q6-codcon" data-correct="codConsulta" class="dropzone min-w-[70px] h-7 border-2 border-dashed rounded-full flex items-center justify-center font-bold text-[10px]" onclick="handleSlotClick('q6-codcon')"></div>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border">dtConsulta</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border">Horário</span>
-                </div>
-              </div>
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2.5">
+              ${q.tableName ? `<span class="text-xs font-mono font-bold text-emerald-600 block mb-2">Esquema Relacional: ${q.tableName}</span>` : ""}
+              ${slotsHtml}
             </div>
-
-            <div>
+            <div class="pt-2">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-semibold text-slate-500">Banco de Peças (Clique para selecionar):</span>
-                <button onclick="clearQuestionSlots(${q.id})" class="text-[11px] text-slate-400 hover:text-rose-500 font-semibold">
+                <span class="text-xs font-bold text-slate-500">Banco de Peças:</span>
+                <button onclick="clearQuestionSlots(${q.id})" class="text-[11px] text-slate-400 hover:text-rose-500 font-bold transition">
                   <i class="fa-solid fa-eraser mr-1"></i> Limpar Espaços
                 </button>
               </div>
@@ -906,15 +1163,17 @@
           `;
         }
 
-        // DROPDOWNS TYPE
-        if (q.type === "dropdowns") {
+        // ==========================================
+        // 5. DROPDOWNS TEORIA & SÍMBOLOS
+        // ==========================================
+        if (q.type === "dropdowns" || q.type === "dropdowns-with-shapes") {
           let rowsHtml = "";
           q.items.forEach(item => {
             rowsHtml += `
-              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span class="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200">"${item.text}"</span>
                 <select onchange="dropdownAnswers['${item.id}'] = this.value; updateGlobalProgress();" 
-                        class="p-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500">
+                        class="p-2.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 shadow-sm">
                   <option value="">Selecione...</option>
                   ${item.options.map(opt => `<option value="${opt}">${opt}</option>`).join("")}
                 </select>
@@ -922,15 +1181,15 @@
             `;
           });
 
-          cardHtml += `<div class="space-y-2.5">${rowsHtml}</div>`;
+          cardHtml += `<div class="space-y-3">${rowsHtml}</div>`;
         }
 
-        // Footer Navigation (Anterior / Próxima)
+        // Footer Navigation
         const prevQId = q.id > 1 ? q.id - 1 : null;
         const nextQId = q.id < questionsBank.length ? q.id + 1 : null;
 
         cardHtml += `
-          <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div class="flex justify-between items-center pt-5 border-t border-slate-100 dark:border-slate-800">
             ${prevQId ? `
               <button onclick="goToQuestion(${prevQId})" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center hover:bg-slate-300 dark:hover:bg-slate-700 transition">
                 <i class="fa-solid fa-arrow-left mr-1.5"></i> Página anterior
@@ -955,14 +1214,14 @@
     }
 
     function selectTokenForDrop(tokValue, btnId) {
-      document.querySelectorAll(".draggable-token").forEach(b => b.classList.remove("selected-for-drop"));
+      document.querySelectorAll(".moodle-token").forEach(b => b.classList.remove("selected"));
       if (selectedToken && selectedToken.btnId === btnId) {
         selectedToken = null;
         return;
       }
       selectedToken = { value: tokValue, btnId: btnId };
       const btn = document.getElementById(btnId);
-      if (btn) btn.classList.add("selected-for-drop");
+      if (btn) btn.classList.add("selected");
     }
 
     function handleSlotClick(slotId) {
@@ -982,7 +1241,7 @@
         slot.innerText = selectedToken.value;
         slot.classList.add("filled");
 
-        document.querySelectorAll(".draggable-token").forEach(b => b.classList.remove("selected-for-drop"));
+        document.querySelectorAll(".moodle-token").forEach(b => b.classList.remove("selected"));
         selectedToken = null;
         updateGlobalProgress();
       }
@@ -1007,10 +1266,10 @@
       const q = questionsBank.find(item => item.id === qId);
       if (!q) return false;
 
-      if (q.type === "slots" || q.type === "der-medica") {
+      if (q.slots) {
         return q.slots.some(s => slotAssignments[s.id] !== undefined);
       }
-      if (q.type === "dropdowns") {
+      if (q.items) {
         return q.items.some(it => dropdownAnswers[it.id] !== undefined && dropdownAnswers[it.id] !== "");
       }
       return false;
@@ -1038,7 +1297,7 @@
         let qScore = 0;
         let isPerfect = false;
 
-        if (q.type === "slots" || q.type === "der-medica") {
+        if (q.slots) {
           let correctSlots = 0;
           q.slots.forEach(s => {
             if (slotAssignments[s.id] === s.correct) {
@@ -1048,7 +1307,7 @@
           const ratio = correctSlots / q.slots.length;
           qScore = ratio * weightPerQuestion;
           isPerfect = correctSlots === q.slots.length;
-        } else if (q.type === "dropdowns") {
+        } else if (q.items) {
           let correctItems = 0;
           q.items.forEach(it => {
             if (dropdownAnswers[it.id] === it.correct) {
@@ -1064,12 +1323,12 @@
         totalPointsEarned += qScore;
 
         detailedHtml += `
-          <div class="p-3.5 rounded-xl border ${isPerfect ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800'} text-xs space-y-1.5">
+          <div class="p-4 rounded-2xl border ${isPerfect ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800'} text-xs space-y-1.5 shadow-sm">
             <div class="flex items-center justify-between font-bold">
               <span class="${isPerfect ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}">
                 Questão ${q.id}: ${q.title}
               </span>
-              <span class="font-mono text-slate-800 dark:text-slate-200">${qScore.toFixed(2).replace(".", ",")} / ${weightPerQuestion.toFixed(2).replace(".", ",")}</span>
+              <span class="font-mono text-slate-800 dark:text-slate-200 font-bold">${qScore.toFixed(2).replace(".", ",")} / ${weightPerQuestion.toFixed(2).replace(".", ",")}</span>
             </div>
             <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">${q.feedback}</p>
           </div>
@@ -1078,7 +1337,7 @@
 
       const gradeStr = totalPointsEarned.toFixed(2).replace(".", ",");
       document.getElementById("res-final-grade").innerText = `${gradeStr} de 10,00 (${((totalPointsEarned / 10) * 100).toFixed(0)}%)`;
-      document.getElementById("res-corrects-count").innerText = `${perfectCount} / ${questionsBank.length} questões completas`;
+      document.getElementById("res-corrects-count").innerText = `${perfectCount} / ${questionsBank.length} perfeitas`;
       document.getElementById("res-time-total").innerText = document.getElementById("timerDisplay").innerText;
       document.getElementById("detailed-results-list").innerHTML = detailedHtml;
 
@@ -1089,7 +1348,7 @@
       slotAssignments = {};
       dropdownAnswers = {};
       selectedToken = null;
-      document.querySelectorAll(".dropzone").forEach(d => {
+      document.querySelectorAll(".moodle-slot").forEach(d => {
         d.innerText = "";
         d.classList.remove("filled");
       });
