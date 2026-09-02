@@ -251,9 +251,13 @@
 
     <!-- HORIZONTAL CATEGORY TABS -->
     <div class="max-w-5xl mx-auto px-3 sm:px-6 flex overflow-x-auto space-x-1.5 sm:space-x-2 py-2 border-t border-slate-200 dark:border-slate-800 text-xs font-semibold no-scrollbar">
-      <button onclick="switchCategory('todas')" id="tab-cat-todas" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-emerald-700 text-white flex items-center space-x-1.5 shadow-sm">
+      <button onclick="switchCategory('apostas')" id="tab-cat-apostas" class="cat-btn shrink-0 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-extrabold flex items-center space-x-1.5 shadow-md animate-pulse">
+        <i class="fa-solid fa-fire text-amber-200"></i>
+        <span>🔥 10 Apostas de Prova</span>
+      </button>
+      <button onclick="switchCategory('todas')" id="tab-cat-todas" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5 shadow-sm">
         <i class="fa-solid fa-layer-group"></i>
-        <span>Todas as 15 Questões</span>
+        <span>Simulado Moodle (15 Qs)</span>
       </button>
       <button onclick="switchCategory('algebra')" id="tab-cat-algebra" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5">
         <i class="fa-solid fa-calculator"></i>
@@ -398,6 +402,222 @@
             <span class="text-rose-400 font-bold">− (Diferença):</span> Elementos na tabela A que não estão na B ➔ <code>π_RA(Aluno) − π_RA(Matricula)</code>
           </div>
         </div>
+      </div>
+    </div>
+
+  
+    <!-- ========================================================================= -->
+    <!-- SECTION: TOP 10 APOSTAS DE PROVA (QUESTÕES QUENTES COM GABARITO & DICAS) -->
+    <!-- ========================================================================= -->
+    <div id="apostas-section" class="hidden space-y-6">
+      
+      <!-- HEADER BANNER -->
+      <div class="p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-rose-500/15 rounded-3xl border-2 border-amber-300 dark:border-amber-700/60 space-y-2">
+        <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400">
+          <i class="fa-solid fa-fire text-xl animate-bounce"></i>
+          <h2 class="text-lg sm:text-xl font-black">Top 10 Apostas Certas para a Prova de Banco de Dados</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+          Estas 10 questões foram minuciosamente selecionadas com base em <strong>todos os exercícios das Aulas 1 a 4, atividades práticas de 100% de nota e tendências das provas do IFSP</strong>. Estude cada uma delas e veja a explicação do gabarito padrão-ouro!
+        </p>
+      </div>
+
+      <div class="space-y-4" id="apostas-list-container">
+        <!-- APOSTA 1 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 1 • Álgebra Relacional
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Atividade Prática 1</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            1. Junção Natural (⨝) Combinada com Seleção (σ) e Projeção (π)
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            <strong>Enunciado Típico:</strong> "Escreva a expressão algébrica para exibir o RA, o Nome do Aluno e o Nome das Disciplinas cursadas apenas pelos alunos matriculados no curso de Sistemas."
+          </p>
+          <div class="p-3 bg-slate-900 text-slate-100 rounded-xl text-xs font-mono overflow-x-auto">
+            <span class="text-emerald-400 font-bold">Expressão Padrão-Ouro:</span><br>
+            π_(RA, Nome, NomeDisc)( σ_(Curso = Sistemas)( Aluno ⨝ Matricula ⨝ Disciplina ) )
+          </div>
+          <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+            <strong>💡 Por que vai cair:</strong> É a questão mais completa de Álgebra Relacional, pois testa os 3 operadores principais em uma única linha (Join para ligar as 3 tabelas, Sigma para filtrar o curso e Pi para selecionar as colunas).
+          </div>
+        </div>
+
+        <!-- APOSTA 2 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 2 • Diferença de Conjuntos
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Atividade Prática 1</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            2. Operação de Diferença (−) para Identificar Registros Sem Relacionamento
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            <strong>Enunciado Típico:</strong> "Escreva a expressão para listar todos os alunos que NÃO possuem nenhuma matrícula ativa (ou clientes que nunca fizeram compras)."
+          </p>
+          <div class="p-3 bg-slate-900 text-slate-100 rounded-xl text-xs font-mono overflow-x-auto">
+            <span class="text-emerald-400 font-bold">Expressão Padrão-Ouro:</span><br>
+            π_RA(Aluno) − π_RA(Matricula)
+          </div>
+          <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+            <strong>⚠️ Pegadinha de Prova:</strong> Para fazer a diferença (−), as duas tabelas DEVEM ser compatíveis em união (mesmo número e tipo de colunas). Por isso, projeta-se `π_RA` em ambos os lados antes de subtrair!
+          </div>
+        </div>
+
+        <!-- APOSTA 3 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 3 • Mapeamento Lógico 1:N
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Aula 04</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            3. Para qual tabela vai a Chave Estrangeira (FK) no Relacionamento 1:N?
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            <strong>Cenário:</strong> "Um Departamento possui vários Empregados (1:N) ou um Paciente realiza várias Consultas (1:N)."
+          </p>
+          <div class="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
+            <strong>Regra de Ouro:</strong> A Chave Primária (PK) da entidade do lado <strong>1</strong> migra para a tabela do lado <strong>N</strong> como <strong>Chave Estrangeira (FK)</strong>.<br>
+            • Tabela gerada: <code>tblConsulta(<u>idConsulta (PK)</u>, dtConsulta, idPaciente (FK), idMedico (FK))</code>
+          </div>
+        </div>
+
+        <!-- APOSTA 4 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 4 • Mapeamento Lógico N:N
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Atividade 3 e 4</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            4. O que acontece na transformação de um Relacionamento N:N para o Modelo Lógico?
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            <strong>Cenário:</strong> "Um Livro é escrito por vários Autores, e um Autor escreve vários Livros (N:N)."
+          </p>
+          <div class="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
+            <strong>Regra de Ouro:</strong> O relacionamento N:N gera <strong>obrigatoriamente uma nova tabela associativa (intermediária)</strong> cuja Chave Primária é Composta pelas PKs de ambas as entidades (atuando como FKs).<br>
+            • Tabela gerada: <code>tblLivroAutor(<u>ISBN (PK/FK)</u>, <u>idAutor (PK/FK)</u>)</code>
+          </div>
+        </div>
+
+        <!-- APOSTA 5 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 5 • Atributo Multivalorado
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Aula 03 e 04</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            5. Como representar no DER e como mapear no Lógico um Atributo Multivalorado?
+          </h3>
+          <div class="space-y-2 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>• <strong>No DER (Conceitual):</strong> É representado por uma <strong>Elipse Dupla</strong> (ex: Telefones do Cliente).</p>
+            <p>• <strong>No Modelo Lógico:</strong> Gera uma <strong>nova tabela separada</strong> contendo a Chave Primária da tabela principal (como FK) mais o atributo valor, formando a PK composta: <code>tblTelefone(<u>idCliente (PK/FK)</u>, <u>numTelefone (PK)</u>)</code>.</p>
+          </div>
+        </div>
+
+        <!-- APOSTA 6 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 6 • Regras de Integridade
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Aula 01 e 04</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            6. Integridade de Entidade vs Integridade Referencial
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border">
+              <strong class="text-emerald-600 block mb-1">Integridade de Entidade:</strong>
+              Nenhum valor de Chave Primária (PK) pode ser nulo (NULL) e cada valor deve ser unívoco.
+            </div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border">
+              <strong class="text-sky-600 block mb-1">Integridade Referencial:</strong>
+              O valor de uma Chave Estrangeira (FK) deve corresponder a uma PK existente na tabela referenciada ou ser nulo.
+            </div>
+          </div>
+        </div>
+
+        <!-- APOSTA 7 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 7 • Álgebra Relacional
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Aula 02</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            7. Seleção (σ) vs Projeção (π): Diferença Conceitual e Operacional
+          </h3>
+          <div class="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>• <strong>Seleção (σ - Sigma):</strong> Operação <strong>horizontal</strong>. Filtra e retorna <strong>linhas (tuplas)</strong> que satisfazem um predicado lógico.</p>
+            <p>• <strong>Projeção (π - Pi):</strong> Operação <strong>vertical</strong>. Filtra e retorna <strong>colunas (atributos)</strong> específicas, <strong>eliminando automaticamente linhas duplicadas</strong>.</p>
+          </div>
+        </div>
+
+        <!-- APOSTA 8 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 8 • Arquitetura ANSI/SPARC
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Aula 01</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            8. Os 3 Níveis da Arquitetura ANSI/SPARC de Bancos de Dados
+          </h3>
+          <div class="space-y-2 text-xs text-slate-700 dark:text-slate-300">
+            <p><strong>1. Nível Externo (Visões):</strong> Como os usuários finais e aplicações individuais enxergam suas partes dos dados.</p>
+            <p><strong>2. Nível Conceitual / Lógico:</strong> Estrutura global e lógica de todas as entidades, relacionamentos e restrições, sem detalhes de disco.</p>
+            <p><strong>3. Nível Interno / Físico:</strong> Como os dados são fisicamente gravados no disco rígido (arquivos, ponteiros, índices, B-Trees).</p>
+          </div>
+        </div>
+
+        <!-- APOSTA 9 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 9 • Participação no DER
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Aula 03</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            9. Participação Total (Mandatória) vs Participação Parcial (Opcional)
+          </h3>
+          <div class="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>• <strong>Participação Total (Linha Dupla ou min=1):</strong> Toda entidade deve participar obrigatoriamente do relacionamento (ex: Toda Consulta precisa ter um Médico e um Paciente).</p>
+            <p>• <strong>Participação Parcial (Linha Simples ou min=0):</strong> A entidade pode ou não participar do relacionamento (ex: Um Médico pode não ter nenhuma consulta agendada ainda).</p>
+          </div>
+        </div>
+
+        <!-- APOSTA 10 -->
+        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-600 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+              🔥 Aposta 10 • Teoria dos Conjuntos
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">Atividade Prática 2</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            10. Subconjunto Próprio (A ⊂ B) vs Subconjunto (A ⊆ B)
+          </h3>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs space-y-1 font-mono">
+            <p class="text-emerald-600 font-bold">A ⊆ B ⇔ ∀ x, se x ∈ A então x ∈ B</p>
+            <p class="text-sky-600 font-bold">A ⊂ B ⇔ A ⊆ B e A ≠ B (B possui estritamente mais elementos que A)</p>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -773,7 +993,17 @@
         document.getElementById("questions-wrapper").classList.add("hidden");
         document.getElementById("moodle-navigator-container").classList.add("hidden");
         document.getElementById("final-result-card").classList.add("hidden");
+        document.getElementById("apostas-section").classList.add("hidden");
         document.getElementById("super-resumo-section").classList.remove("hidden");
+        return;
+      }
+
+      if (cat === "apostas") {
+        document.getElementById("questions-wrapper").classList.add("hidden");
+        document.getElementById("moodle-navigator-container").classList.add("hidden");
+        document.getElementById("final-result-card").classList.add("hidden");
+        document.getElementById("super-resumo-section").classList.add("hidden");
+        document.getElementById("apostas-section").classList.remove("hidden");
         return;
       }
 
