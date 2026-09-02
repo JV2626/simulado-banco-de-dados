@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Simulado Moodle: Banco de Dados 1 | IFSP</title>
+  <meta name="description" content="Simulador gamificado e interativo da Avaliação de Banco de Dados 1 no Moodle - IFSP">
+  <meta name="theme-color" content="#15803d">
+  
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            ifsp: {
+              50: "#f0fdf4",
+              100: "#dcfce7",
+              500: "#22c55e",
+              600: "#16a34a",
+              700: "#15803d",
+              800: "#166534",
+              900: "#14532d",
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+    
+    * {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    code, pre {
+      font-family: "Fira Code", monospace;
+    }
+
+    .dropzone {
+      min-height: 38px;
+      min-width: 44px;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone.active-target {
+      border-color: #16a34a !important;
+      background-color: #dcfce7 !important;
+      transform: scale(1.04);
+    }
+
+    .dark .dropzone.active-target {
+      background-color: #14532d !important;
+      border-color: #4ade80 !important;
+    }
+
+    .draggable-token {
+      cursor: grab;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .draggable-token:active {
+      cursor: grabbing;
+      transform: scale(0.96);
+    }
+
+    .draggable-token.selected-for-drop {
+      ring: 3px solid #16a34a;
+      border-color: #16a34a !important;
+      background-color: #dcfce7 !important;
+      transform: scale(1.05);
+    }
+
+    .dark .draggable-token.selected-for-drop {
+      background-color: #14532d !important;
+      border-color: #4ade80 !important;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 antialiased pb-16">
+
+  <!-- MOODLE TOP NAV -->
+  <header class="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2">
+      
+      <!-- IFSP Moodle Brand -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-700 flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0">
+          <i class="fa-solid fa-database"></i>
+        </div>
+        <div>
+          <h1 class="text-xs sm:text-sm font-extrabold leading-tight text-slate-900 dark:text-white">Moodle IFSP • Banco de Dados</h1>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">SGBD 01 • Prof. Flávio Mania</p>
+        </div>
+      </div>
+
+      <!-- Controls & Timer -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Live Score -->
+        <div class="flex items-center bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-200 dark:border-emerald-800/80">
+          <i class="fa-solid fa-star text-amber-500 mr-1.5 text-[11px]"></i>
+          <span>Nota: <span id="headerGrade">10,00</span></span>
+        </div>
+
+        <!-- Timer -->
+        <div class="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300">
+          <i class="fa-regular fa-clock text-emerald-600 mr-1.5"></i>
+          <span id="timerDisplay">00:00:00</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleDarkMode()" aria-label="Alternar tema" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+          <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- MOODLE BREADCRUMB -->
+    <div class="bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200/80 dark:border-slate-800 px-3 sm:px-6 py-1.5 text-[11px] text-slate-500 flex items-center overflow-x-auto no-scrollbar space-x-1.5">
+      <i class="fa-solid fa-house text-emerald-600"></i>
+      <span>&gt;</span>
+      <span class="shrink-0">Meus cursos</span>
+      <span>&gt;</span>
+      <span class="shrink-0">Graduação - SGBD 01 - 2026/02</span>
+      <span>&gt;</span>
+      <span class="shrink-0 font-semibold text-slate-800 dark:text-slate-200">Avaliação de Banco de Dados 1</span>
+    </div>
+
+    <!-- HORIZONTAL TABS (Moodle Test vs Treino Extra vs Resumo) -->
+    <div class="max-w-5xl mx-auto px-3 sm:px-6 flex overflow-x-auto space-x-1.5 sm:space-x-2 py-2 border-t border-slate-200 dark:border-slate-800 text-xs font-semibold no-scrollbar">
+      <button onclick="switchMode('moodle')" id="tab-moodle" class="tab-btn shrink-0 px-3.5 py-1.5 rounded-full bg-emerald-700 text-white flex items-center space-x-1.5 shadow-sm">
+        <i class="fa-solid fa-gamepad"></i>
+        <span>Simulado Moodle (5 Questões)</span>
+      </button>
+      <button onclick="switchMode('treino')" id="tab-treino" class="tab-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Treino Extra (15 Questões)</span>
+      </button>
+      <button onclick="switchMode('resumo')" id="tab-resumo" class="tab-btn shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center space-x-1.5">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Super Resumo & Dicionário</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+
+    <!-- ========================================================================= -->
+    <!-- MODE 1: SIMULADO MOODLE (5 QUESTÕES OFICIAIS) -->
+    <!-- ========================================================================= -->
+    <div id="mode-moodle" class="space-y-5">
+
+      <!-- MOODLE QUESTION WIZARD BAR -->
+      <div class="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+          <span class="text-xs font-bold text-slate-500 mr-1 hidden sm:inline">Navegação:</span>
+          <button onclick="goToMoodleQuestion(1)" id="qbtn-1" class="w-8 h-8 rounded-lg font-bold text-xs bg-emerald-700 text-white shadow-sm transition">1</button>
+          <button onclick="goToMoodleQuestion(2)" id="qbtn-2" class="w-8 h-8 rounded-lg font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">2</button>
+          <button onclick="goToMoodleQuestion(3)" id="qbtn-3" class="w-8 h-8 rounded-lg font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">3</button>
+          <button onclick="goToMoodleQuestion(4)" id="qbtn-4" class="w-8 h-8 rounded-lg font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">4</button>
+          <button onclick="goToMoodleQuestion(5)" id="qbtn-5" class="w-8 h-8 rounded-lg font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">5</button>
+        </div>
+        <button onclick="finishMoodleAttempt()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center shrink-0">
+          <i class="fa-solid fa-flag-checkered mr-1.5"></i> Finalizar Tentativa
+        </button>
+      </div>
+
+      <!-- INSTRUCTION HELPER BANNER -->
+      <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 flex items-start space-x-2">
+        <i class="fa-solid fa-hand-pointer text-emerald-600 mt-0.5 shrink-0"></i>
+        <span><strong>Como interagir:</strong> No celular ou computador, você pode <strong>arrastar</strong> ou simplesmente <strong>tocar na peça e depois tocar no quadrado cinza de destino</strong>! Toque em uma peça já posicionada para removê-la.</span>
+      </div>
+
+      <!-- QUESTÃO 1: ÁLGEBRA RELACIONAL - SELEÇÃO -->
+      <div id="moodle-card-1" class="moodle-card bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Questão 1</span>
+            <p class="text-xs text-slate-400 font-medium">Vale 2,00 ponto(s)</p>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-300">Álgebra Relacional</span>
+        </div>
+
+        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          Agora a expressão para <strong>todos os clientes do sexo Feminino que gostam da cor azul</strong>:
+        </p>
+
+        <!-- Tabela CLIENTE Visual -->
+        <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-900 text-white font-bold">
+              <tr>
+                <th class="p-2 border-r border-slate-700">codigo</th>
+                <th class="p-2 border-r border-slate-700">nome</th>
+                <th class="p-2 border-r border-slate-700">sexo</th>
+                <th class="p-2 border-r border-slate-700">cidade</th>
+                <th class="p-2">cor_preferida</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-[11px] font-medium">
+              <tr><td class="p-1.5 font-bold">1</td><td class="p-1.5">Pica-Pau</td><td class="p-1.5">M</td><td class="p-1.5">Sorocaba</td><td class="p-1.5">Vermelho</td></tr>
+              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1.5 font-bold">2</td><td class="p-1.5">Leôncio</td><td class="p-1.5">M</td><td class="p-1.5">Itapetininga</td><td class="p-1.5">Azul</td></tr>
+              <tr><td class="p-1.5 font-bold">3</td><td class="p-1.5">Zé Urso</td><td class="p-1.5">M</td><td class="p-1.5">São Miguel Arcanjo</td><td class="p-1.5">Marrom</td></tr>
+              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1.5 font-bold">4</td><td class="p-1.5">Olívio</td><td class="p-1.5">M</td><td class="p-1.5">Apiaí</td><td class="p-1.5">Verde</td></tr>
+              <tr><td class="p-1.5 font-bold">5</td><td class="p-1.5">Vovó Pica-Pau</td><td class="p-1.5">F</td><td class="p-1.5">Sorocaba</td><td class="p-1.5">Roxo</td></tr>
+              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1.5 font-bold">6</td><td class="p-1.5">Picolino</td><td class="p-1.5">M</td><td class="p-1.5">Itapetininga</td><td class="p-1.5">Vermelho</td></tr>
+              <tr><td class="p-1.5 font-bold">7</td><td class="p-1.5">Lúcio</td><td class="p-1.5">M</td><td class="p-1.5">Sorocaba</td><td class="p-1.5">Azul</td></tr>
+              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1.5 font-bold">8</td><td class="p-1.5">Gertrudes</td><td class="p-1.5">F</td><td class="p-1.5">São Miguel Arcanjo</td><td class="p-1.5">Vermelho</td></tr>
+              <tr><td class="p-1.5 font-bold">9</td><td class="p-1.5">Bernarda</td><td class="p-1.5">F</td><td class="p-1.5">Apiaí</td><td class="p-1.5">Marrom</td></tr>
+              <tr class="bg-slate-50 dark:bg-slate-800/40"><td class="p-1.5 font-bold">10</td><td class="p-1.5">Zeca Urso</td><td class="p-1.5">M</td><td class="p-1.5">Itapetininga</td><td class="p-1.5">Verde</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Slot Construction Area (Matching Moodle photo) -->
+        <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block">Construir Expressão:</span>
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Operador Principal: Sigma -->
+            <div id="slot-1-1" data-correct="σ" class="dropzone w-12 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-1')"></div>
+
+            <!-- Parênteses da Condição -->
+            <div id="slot-1-2" data-correct="(" class="dropzone w-8 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-2')"></div>
+
+            <!-- sexo -->
+            <div id="slot-1-3" data-correct="sexo" class="dropzone min-w-[56px] px-2 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-3')"></div>
+
+            <!-- = -->
+            <div id="slot-1-4" data-correct="=" class="dropzone w-8 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-4')"></div>
+
+            <!-- 'F' -->
+            <div id="slot-1-5" data-correct="'F'" class="dropzone w-10 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-5')"></div>
+
+            <!-- ^ (AND) -->
+            <div id="slot-1-6" data-correct="^" class="dropzone w-8 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-6')"></div>
+
+            <!-- cor_preferida -->
+            <div id="slot-1-7" data-correct="cor_preferida" class="dropzone min-w-[90px] px-2 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-7')"></div>
+
+            <!-- = -->
+            <div id="slot-1-8" data-correct="=" class="dropzone w-8 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-8')"></div>
+
+            <!-- 'Azul' -->
+            <div id="slot-1-9" data-correct="'Azul'" class="dropzone min-w-[56px] px-2 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-9')"></div>
+
+            <!-- ) -->
+            <div id="slot-1-10" data-correct=")" class="dropzone w-8 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-10')"></div>
+
+            <!-- (CLIENTE) -->
+            <div id="slot-1-11" data-correct="(CLIENTE)" class="dropzone min-w-[80px] px-2.5 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('1-11')"></div>
+          </div>
+        </div>
+
+        <!-- Draggable Token Bank (Matching Moodle photo) -->
+        <div>
+          <span class="text-xs font-semibold text-slate-500 block mb-2">Banco de Peças (Clique para selecionar e depois toque no espaço acima):</span>
+          <div id="bank-q1" class="flex flex-wrap gap-2">
+            <!-- Tokens rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Nav footer -->
+        <div class="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="goToMoodleQuestion(2)" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center shadow-sm">
+            Próxima página <i class="fa-solid fa-arrow-right ml-1.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- QUESTÃO 2: ÁLGEBRA RELACIONAL - PROJEÇÃO -->
+      <div id="moodle-card-2" class="moodle-card hidden bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Questão 2</span>
+            <p class="text-xs text-slate-400 font-medium">Vale 2,00 ponto(s)</p>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-300">Álgebra Relacional</span>
+        </div>
+
+        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          Construir a expressão algébrica que faça: <strong>Apresentar o nome e a cidade de todos os cliente.</strong>
+        </p>
+
+        <!-- Slot Construction Area -->
+        <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block">Construir Expressão:</span>
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- π -->
+            <div id="slot-2-1" data-correct="π" class="dropzone w-12 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('2-1')"></div>
+            <!-- ( -->
+            <div id="slot-2-2" data-correct="(" class="dropzone w-8 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('2-2')"></div>
+            <!-- nome -->
+            <div id="slot-2-3" data-correct="nome" class="dropzone min-w-[60px] px-2 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('2-3')"></div>
+            <!-- cidade -->
+            <div id="slot-2-4" data-correct="cidade" class="dropzone min-w-[60px] px-2 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('2-4')"></div>
+            <!-- ) -->
+            <div id="slot-2-5" data-correct=")" class="dropzone w-8 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-sm bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('2-5')"></div>
+            <!-- Cliente -->
+            <div id="slot-2-6" data-correct="Cliente" class="dropzone min-w-[70px] px-2.5 h-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs bg-white dark:bg-slate-900 shadow-inner" onclick="handleSlotClick('2-6')"></div>
+          </div>
+        </div>
+
+        <!-- Token Bank -->
+        <div>
+          <span class="text-xs font-semibold text-slate-500 block mb-2">Banco de Peças:</span>
+          <div id="bank-q2" class="flex flex-wrap gap-2">
+            <!-- Tokens rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Nav footer -->
+        <div class="flex justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="goToMoodleQuestion(1)" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i> Página anterior
+          </button>
+          <button onclick="goToMoodleQuestion(3)" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center shadow-sm">
+            Próxima página <i class="fa-solid fa-arrow-right ml-1.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- QUESTÃO 3: MODELO CONCEITUAL (DER) -->
+      <div id="moodle-card-3" class="moodle-card hidden bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Questão 3</span>
+            <p class="text-xs text-slate-400 font-medium">Vale 2,00 ponto(s)</p>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-300">Diagrama Entidade-Relacionamento</span>
+        </div>
+
+        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          <strong>Completar o DER?</strong> Arraste ou selecione as entidades, chaves e cardinalidades nos locais corretos do diagrama:
+        </p>
+
+        <!-- Interactive Visual Diagram (Clínica Médica) -->
+        <div class="relative bg-slate-50 dark:bg-slate-800/40 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto min-w-[340px]">
+          
+          <div class="max-w-xl mx-auto space-y-6">
+            <!-- LINHA SUPERIOR: Paciente e Medico -->
+            <div class="grid grid-cols-2 gap-4">
+              
+              <!-- Bloco Paciente -->
+              <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 text-center">
+                <div class="flex justify-center gap-1.5">
+                  <!-- Atributos -->
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">dtNasc</span>
+                  <div id="slot-3-codPaciente" data-correct="codPaciente" class="dropzone min-w-[70px] h-7 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-full flex items-center justify-center font-bold text-[10px] bg-slate-50 dark:bg-slate-800" onclick="handleSlotClick('3-codPaciente')"><u>codPaciente</u></div>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">Nome</span>
+                </div>
+                <!-- Entidade Retângulo -->
+                <div id="slot-3-Paciente" data-correct="Paciente" class="dropzone h-10 border-2 border-dashed border-emerald-500 rounded-lg flex items-center justify-center font-bold text-xs bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 shadow-sm" onclick="handleSlotClick('3-Paciente')">
+                  [ Entidade Paciente ]
+                </div>
+                <div class="flex justify-center items-center text-xs font-bold text-slate-500">
+                  Cardinalidade: 
+                  <div id="slot-3-card1" data-correct="1" class="dropzone w-7 h-7 ml-1 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded flex items-center justify-center text-xs" onclick="handleSlotClick('3-card1')"></div>
+                </div>
+              </div>
+
+              <!-- Bloco Medico -->
+              <div class="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 text-center">
+                <div class="flex justify-center gap-1.5">
+                  <!-- Atributos -->
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">CRM</span>
+                  <div id="slot-3-codMedico" data-correct="codMedico" class="dropzone min-w-[70px] h-7 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-full flex items-center justify-center font-bold text-[10px] bg-slate-50 dark:bg-slate-800" onclick="handleSlotClick('3-codMedico')"><u>codMedico</u></div>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">Nome</span>
+                </div>
+                <!-- Entidade Retângulo -->
+                <div id="slot-3-Medico" data-correct="Medico" class="dropzone h-10 border-2 border-dashed border-sky-500 rounded-lg flex items-center justify-center font-bold text-xs bg-sky-50/50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 shadow-sm" onclick="handleSlotClick('3-Medico')">
+                  [ Entidade Medico ]
+                </div>
+                <div class="flex justify-center items-center text-xs font-bold text-slate-500">
+                  Relacionamento:
+                  <div id="slot-3-atende" data-correct="atende" class="dropzone min-w-[60px] h-7 ml-1 border-2 border-dashed border-amber-400 rounded-lg flex items-center justify-center text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800" onclick="handleSlotClick('3-atende')"></div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- LINHA INFERIOR: Consulta Central -->
+            <div class="max-w-md mx-auto p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3 text-center">
+              <div class="flex justify-center items-center gap-2 text-xs font-bold text-slate-500">
+                Cardinalidade Consulta:
+                <div id="slot-3-cardN" data-correct="N" class="dropzone w-7 h-7 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded flex items-center justify-center text-xs" onclick="handleSlotClick('3-cardN')"></div>
+              </div>
+
+              <!-- Entidade Consulta -->
+              <div id="slot-3-Consulta" data-correct="Consulta" class="dropzone h-10 border-2 border-dashed border-purple-500 rounded-lg flex items-center justify-center font-bold text-xs bg-purple-50/50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 shadow-sm" onclick="handleSlotClick('3-Consulta')">
+                [ Entidade Consulta ]
+              </div>
+
+              <!-- Atributos Consulta -->
+              <div class="flex flex-wrap justify-center gap-1.5">
+                <div id="slot-3-codConsulta" data-correct="codConsulta" class="dropzone min-w-[70px] h-7 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-full flex items-center justify-center font-bold text-[10px] bg-slate-50 dark:bg-slate-800" onclick="handleSlotClick('3-codConsulta')"><u>codConsulta</u></div>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">dtConsulta</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">Horário</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Token Bank -->
+        <div>
+          <span class="text-xs font-semibold text-slate-500 block mb-2">Banco de Peças:</span>
+          <div id="bank-q3" class="flex flex-wrap gap-2">
+            <!-- Tokens rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Nav footer -->
+        <div class="flex justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="goToMoodleQuestion(2)" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i> Página anterior
+          </button>
+          <button onclick="goToMoodleQuestion(4)" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center shadow-sm">
+            Próxima página <i class="fa-solid fa-arrow-right ml-1.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- QUESTÃO 4: DADO, INFORMAÇÃO E CONHECIMENTO -->
+      <div id="moodle-card-4" class="moodle-card hidden bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Questão 4</span>
+            <p class="text-xs text-slate-400 font-medium">Vale 2,00 ponto(s)</p>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-300">Teoria de SGBD</span>
+        </div>
+
+        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          Selecione a classificação correta (<strong>Dado, Informação ou Conhecimento</strong>) para cada uma das sentenças abaixo:
+        </p>
+
+        <div class="space-y-3" id="q4-dropdown-container">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Nav footer -->
+        <div class="flex justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="goToMoodleQuestion(3)" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i> Página anterior
+          </button>
+          <button onclick="goToMoodleQuestion(5)" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center shadow-sm">
+            Próxima página <i class="fa-solid fa-arrow-right ml-1.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- QUESTÃO 5: FUNÇÃO DOS SÍMBOLOS DO MER / DER -->
+      <div id="moodle-card-5" class="moodle-card hidden bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Questão 5</span>
+            <p class="text-xs text-slate-400 font-medium">Vale 2,00 ponto(s)</p>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-300">Simbologia do MER / DER</span>
+        </div>
+
+        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          Associe cada símbolo gráfico da notação do Modelo Entidade-Relacionamento à sua respectiva função:
+        </p>
+
+        <div class="space-y-3" id="q5-dropdown-container">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Nav footer -->
+        <div class="flex justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="goToMoodleQuestion(4)" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i> Página anterior
+          </button>
+          <button onclick="finishMoodleAttempt()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center shadow-md">
+            <i class="fa-solid fa-check-double mr-1.5"></i> Finalizar Tentativa e Ver Nota
+          </button>
+        </div>
+      </div>
+
+      <!-- MOODLE FINAL RESULT / REVISÃO DA TENTATIVA -->
+      <div id="moodle-result-box" class="hidden bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md space-y-5">
+        <div class="text-center space-y-2">
+          <div class="w-14 h-14 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 text-2xl shadow-inner">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white">Revisão da Tentativa</h2>
+          <p class="text-xs text-slate-500">Avaliação de Banco de Dados 1 • IFSP Itapetininga</p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Estado</span>
+            <span class="text-xs font-bold text-emerald-600">Finalizada</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Tempo Gasto</span>
+            <span id="res-time" class="text-xs font-bold text-slate-700 dark:text-slate-200">00:02:15</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Acertos</span>
+            <span id="res-corrects" class="text-xs font-bold text-emerald-600">5 / 5 questões</span>
+          </div>
+          <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+            <span class="text-[10px] text-emerald-600 block uppercase font-bold">Nota Final</span>
+            <span id="res-grade" class="text-base font-extrabold text-emerald-700 dark:text-emerald-300">10,00 de 10,00 (100%)</span>
+          </div>
+        </div>
+
+        <!-- Feedback Per Question -->
+        <div id="moodle-detailed-feedback" class="space-y-3 pt-2">
+          <!-- Rendered by JS -->
+        </div>
+
+        <div class="flex justify-center pt-3">
+          <button onclick="restartMoodleAttempt()" class="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center">
+            <i class="fa-solid fa-rotate-right mr-2"></i> Fazer Outra Tentativa
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODE 2: TREINO EXTRA (15 QUESTÕES OBJETIVAS) -->
+    <!-- ========================================================================= -->
+    <div id="mode-treino" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Treino Extra: Álgebra Relacional, DER e Lógico</h2>
+          <p class="text-xs text-slate-500">15 questões completas baseadas em todas as 4 aulas e exercícios das listas.</p>
+        </div>
+        <button onclick="resetExtraQuiz()" class="text-xs bg-slate-200 dark:bg-slate-800 px-3 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-300">
+          Reiniciar
+        </button>
+      </div>
+
+      <div id="extra-quiz-container" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODE 3: SUPER RESUMO & DICIONÁRIO -->
+    <!-- ========================================================================= -->
+    <div id="mode-resumo" class="hidden space-y-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Super Resumo & Dicionário de SGBD</h2>
+          <p class="text-xs text-slate-500">Consulta rápida de operadores, símbolos e regras de mapeamento.</p>
+        </div>
+        <button onclick="window.print()" class="text-xs bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold flex items-center shadow-sm">
+          <i class="fa-solid fa-print mr-1.5"></i> Imprimir / Salvar PDF
+        </button>
+      </div>
+
+      <!-- SÍMBOLOS DER -->
+      <div class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center">
+          <i class="fa-solid fa-shapes mr-2"></i> Símbolos Oficiais do MER (Peter Chen)
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="font-bold text-slate-900 dark:text-white block mb-1">■ Retângulo ➔ Entidade</span>
+            <p class="text-slate-600 dark:text-slate-300">Objeto ou conceito do mundo real sobre o qual guardamos dados (ex: Paciente, Médico).</p>
+          </div>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="font-bold text-slate-900 dark:text-white block mb-1">● Elipse / Oval ➔ Atributo</span>
+            <p class="text-slate-600 dark:text-slate-300">Propriedade da entidade. Sublinhado = Chave Primária; Duplo = Multivalorado; Tracejado = Derivado.</p>
+          </div>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="font-bold text-slate-900 dark:text-white block mb-1">◆ Losango ➔ Relacionamento</span>
+            <p class="text-slate-600 dark:text-slate-300">Associação entre entidades (ex: tem, atende, cursa, realiza).</p>
+          </div>
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="font-bold text-slate-900 dark:text-white block mb-1">(min, max) / 1:N ➔ Cardinalidade</span>
+            <p class="text-slate-600 dark:text-slate-300">Número de ocorrências que participam da associação (1:1, 1:N, N:N).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÁLGEBRA RELACIONAL -->
+      <div class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-sky-700 dark:text-sky-400 flex items-center">
+          <i class="fa-solid fa-calculator mr-2"></i> Operadores da Álgebra Relacional
+        </h3>
+        <div class="space-y-2 text-xs">
+          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+            <span class="text-emerald-400 font-bold">σ (Seleção):</span> Filtra LINHAS / TUPLAS ➔ <code>σ_(sexo = 'F')(CLIENTE)</code>
+          </div>
+          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+            <span class="text-sky-400 font-bold">π (Projeção):</span> Filtra COLUNAS / ATRIBUTOS ➔ <code>π_(nome, cidade)(CLIENTE)</code>
+          </div>
+          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+            <span class="text-amber-400 font-bold">⨝ (Junção / Join):</span> Conecta tabelas com base em chaves ➔ <code>Aluno ⨝ Matricula</code>
+          </div>
+          <div class="p-2.5 bg-slate-900 text-slate-100 rounded-xl">
+            <span class="text-rose-400 font-bold">− (Diferença):</span> Elementos na tabela A que não estão na B ➔ <code>π_RA(Aluno) − π_RA(Matricula)</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    const tokensQ1 = ["(", "^", "=", "*", "'Azul'", "'F'", "sexo", "(CLIENTE)", "cor_preferida", "π", "σ", ")"];
+    const tokensQ2 = ["π", "(", "Cliente", "nome", ")", "cidade"];
+    const tokensQ3 = ["Paciente", "codPaciente", "Consulta", "codConsulta", "atende", "Medico", "codMedico", "N", "1"];
+
+    const q4Data = [
+      { id: "q4-1", text: "37.5", correct: "Dado", options: ["Dado", "Informação", "Conhecimento"] },
+      { id: "q4-2", text: "Temperatura de 37.5°C", correct: "Informação", options: ["Dado", "Informação", "Conhecimento"] },
+      { id: "q4-3", text: "Paciente pode estar com febre e necessita de atendimento", correct: "Conhecimento", options: ["Dado", "Informação", "Conhecimento"] },
+      { id: "q4-4", text: "Sorocaba", correct: "Dado", options: ["Dado", "Informação", "Conhecimento"] },
+      { id: "q4-5", text: "Tendência de preferência da cor vermelha na cidade de Sorocaba", correct: "Conhecimento", options: ["Dado", "Informação", "Conhecimento"] }
+    ];
+
+    const q5Data = [
+      { id: "q5-1", text: "Retângulo (ex: Paciente, Médico)", correct: "Entidade", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
+      { id: "q5-2", text: "Elipse / Oval (ex: dtNascimento, Nome, CRM)", correct: "Atributo", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
+      { id: "q5-3", text: "Losango (ex: tem, atende, realiza)", correct: "Relacionamento", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] },
+      { id: "q5-4", text: "(1,1), (0,N), 1:N (indica o número de ocorrências associadas)", correct: "Cardinalidade", options: ["Entidade", "Atributo", "Relacionamento", "Cardinalidade"] }
+    ];
+
+    let selectedToken = null;
+    let slotAssignments = {};
+    let q4Answers = {};
+    let q5Answers = {};
+
+    function init() {
+      renderTokenBank("q1", tokensQ1);
+      renderTokenBank("q2", tokensQ2);
+      renderTokenBank("q3", tokensQ3);
+      renderQ4Dropdowns();
+      renderQ5Dropdowns();
+      renderExtraQuiz();
+      startTimer();
+    }
+
+    function switchMode(mode) {
+      document.getElementById("mode-moodle").classList.add("hidden");
+      document.getElementById("mode-treino").classList.add("hidden");
+      document.getElementById("mode-resumo").classList.add("hidden");
+      document.getElementById("mode-" + mode).classList.remove("hidden");
+
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.remove("bg-emerald-700", "text-white", "shadow-sm");
+        btn.classList.add("bg-slate-100", "dark:bg-slate-800", "text-slate-600", "dark:text-slate-300");
+      });
+
+      const activeBtn = document.getElementById("tab-" + mode);
+      activeBtn.classList.remove("bg-slate-100", "dark:bg-slate-800", "text-slate-600", "dark:text-slate-300");
+      activeBtn.classList.add("bg-emerald-700", "text-white", "shadow-sm");
+    }
+
+    function goToMoodleQuestion(num) {
+      document.querySelectorAll(".moodle-card").forEach(c => c.classList.add("hidden"));
+      document.getElementById("moodle-result-box").classList.add("hidden");
+      document.getElementById("moodle-card-" + num).classList.remove("hidden");
+
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById("qbtn-" + i);
+        if (i === num) {
+          btn.className = "w-8 h-8 rounded-lg font-bold text-xs bg-emerald-700 text-white shadow-sm transition";
+        } else {
+          btn.className = "w-8 h-8 rounded-lg font-bold text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition";
+        }
+      }
+    }
+
+    function renderTokenBank(qKey, tokens) {
+      const bank = document.getElementById("bank-" + qKey);
+      bank.innerHTML = "";
+      tokens.forEach((tok, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "draggable-token px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 shadow-sm hover:border-emerald-500";
+        btn.innerText = tok;
+        btn.id = `token-${qKey}-${idx}`;
+        btn.onclick = () => selectTokenForDrop(tok, btn.id);
+        bank.appendChild(btn);
+      });
+    }
+
+    function selectTokenForDrop(tokValue, btnId) {
+      document.querySelectorAll(".draggable-token").forEach(b => b.classList.remove("selected-for-drop"));
+      if (selectedToken && selectedToken.btnId === btnId) {
+        selectedToken = null;
+        return;
+      }
+      selectedToken = { value: tokValue, btnId: btnId };
+      document.getElementById(btnId).classList.add("selected-for-drop");
+    }
+
+    function handleSlotClick(slotId) {
+      const slot = document.getElementById("slot-" + slotId);
+      
+      // If slot already has a value and no token selected, clear it
+      if (slotAssignments[slotId] && !selectedToken) {
+        delete slotAssignments[slotId];
+        slot.innerText = "";
+        slot.classList.remove("bg-emerald-100", "dark:bg-emerald-900/60", "border-emerald-500");
+        return;
+      }
+
+      // If token is selected, place into slot
+      if (selectedToken) {
+        slotAssignments[slotId] = selectedToken.value;
+        slot.innerText = selectedToken.value;
+        slot.classList.add("bg-emerald-100", "dark:bg-emerald-900/60", "border-emerald-500");
+        
+        document.querySelectorAll(".draggable-token").forEach(b => b.classList.remove("selected-for-drop"));
+        selectedToken = null;
+      }
+    }
+
+    function renderQ4Dropdowns() {
+      const container = document.getElementById("q4-dropdown-container");
+      container.innerHTML = "";
+      q4Data.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2";
+        row.innerHTML = `
+          <span class="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200">"${item.text}"</span>
+          <select onchange="q4Answers['${item.id}'] = this.value" class="p-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500">
+            <option value="">Selecione...</option>
+            ${item.options.map(opt => `<option value="${opt}">${opt}</option>`).join("")}
+          </select>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function renderQ5Dropdowns() {
+      const container = document.getElementById("q5-dropdown-container");
+      container.innerHTML = "";
+      q5Data.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2";
+        row.innerHTML = `
+          <span class="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200">${item.text}</span>
+          <select onchange="q5Answers['${item.id}'] = this.value" class="p-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500">
+            <option value="">Selecione...</option>
+            ${item.options.map(opt => `<option value="${opt}">${opt}</option>`).join("")}
+          </select>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function finishMoodleAttempt() {
+      document.querySelectorAll(".moodle-card").forEach(c => c.classList.add("hidden"));
+      const resBox = document.getElementById("moodle-result-box");
+      resBox.classList.remove("hidden");
+
+      let totalPoints = 0;
+      let feedbackHtml = "";
+
+      // Evaluate Q1 (2.0 pts)
+      const q1Slots = ["1-1", "1-2", "1-3", "1-4", "1-5", "1-6", "1-7", "1-8", "1-9", "1-10", "1-11"];
+      let q1CorrectCount = 0;
+      q1Slots.forEach(id => {
+        const expected = document.getElementById("slot-" + id).getAttribute("data-correct");
+        if (slotAssignments[id] === expected) q1CorrectCount++;
+      });
+      const q1Score = (q1CorrectCount / q1Slots.length) * 2.0;
+      totalPoints += q1Score;
+      feedbackHtml += createFeedbackBlock(1, "Álgebra Relacional (Seleção)", q1Score, 2.0, "Expressão correta: σ(sexo = 'F' ^ cor_preferida = 'Azul')(CLIENTE)");
+
+      // Evaluate Q2 (2.0 pts)
+      const q2Slots = ["2-1", "2-2", "2-3", "2-4", "2-5", "2-6"];
+      let q2CorrectCount = 0;
+      q2Slots.forEach(id => {
+        const expected = document.getElementById("slot-" + id).getAttribute("data-correct");
+        if (slotAssignments[id] === expected) q2CorrectCount++;
+      });
+      const q2Score = (q2CorrectCount / q2Slots.length) * 2.0;
+      totalPoints += q2Score;
+      feedbackHtml += createFeedbackBlock(2, "Álgebra Relacional (Projeção)", q2Score, 2.0, "Expressão correta: π(nome, cidade)(Cliente)");
+
+      // Evaluate Q3 (2.0 pts)
+      const q3Slots = ["3-Paciente", "3-codPaciente", "3-Medico", "3-codMedico", "3-atende", "3-card1", "3-Consulta", "3-codConsulta", "3-cardN"];
+      let q3CorrectCount = 0;
+      q3Slots.forEach(id => {
+        const expected = document.getElementById("slot-" + id).getAttribute("data-correct");
+        if (slotAssignments[id] === expected) q3CorrectCount++;
+      });
+      const q3Score = (q3CorrectCount / q3Slots.length) * 2.0;
+      totalPoints += q3Score;
+      feedbackHtml += createFeedbackBlock(3, "Modelo Conceitual (DER)", q3Score, 2.0, "Paciente(1) --- tem --- (N) Consulta (N) --- atende --- (1) Medico");
+
+      // Evaluate Q4 (2.0 pts)
+      let q4CorrectCount = 0;
+      q4Data.forEach(item => {
+        if (q4Answers[item.id] === item.correct) q4CorrectCount++;
+      });
+      const q4Score = (q4CorrectCount / q4Data.length) * 2.0;
+      totalPoints += q4Score;
+      feedbackHtml += createFeedbackBlock(4, "Dado, Informação e Conhecimento", q4Score, 2.0, "37.5 = Dado; Temperatura = Informação; Quadro febril = Conhecimento");
+
+      // Evaluate Q5 (2.0 pts)
+      let q5CorrectCount = 0;
+      q5Data.forEach(item => {
+        if (q5Answers[item.id] === item.correct) q5CorrectCount++;
+      });
+      const q5Score = (q5CorrectCount / q5Data.length) * 2.0;
+      totalPoints += q5Score;
+      feedbackHtml += createFeedbackBlock(5, "Simbologia do MER / DER", q5Score, 2.0, "Retângulo = Entidade; Elipse = Atributo; Losango = Relacionamento; (1,N) = Cardinalidade");
+
+      const gradeFormatted = totalPoints.toFixed(2).replace(".", ",");
+      document.getElementById("res-grade").innerText = `${gradeFormatted} de 10,00 (${((totalPoints / 10) * 100).toFixed(0)}%)`;
+      document.getElementById("headerGrade").innerText = gradeFormatted;
+      document.getElementById("res-time").innerText = document.getElementById("timerDisplay").innerText;
+      document.getElementById("moodle-detailed-feedback").innerHTML = feedbackHtml;
+    }
+
+    function createFeedbackBlock(qNum, title, score, maxScore, note) {
+      const isFull = score === maxScore;
+      return `
+        <div class="p-3.5 rounded-xl border ${isFull ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800'} text-xs space-y-1">
+          <div class="flex items-center justify-between font-bold">
+            <span class="${isFull ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}">
+              Questão ${qNum}: ${title}
+            </span>
+            <span class="font-mono">${score.toFixed(2).replace(".", ",")} / ${maxScore.toFixed(2).replace(".", ",")}</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">${note}</p>
+        </div>
+      `;
+    }
+
+    function restartMoodleAttempt() {
+      slotAssignments = {};
+      q4Answers = {};
+      q5Answers = {};
+      selectedToken = null;
+      document.querySelectorAll(".dropzone").forEach(d => {
+        d.innerText = "";
+        d.className = d.className.replace(/bg-emerald-100|dark:bg-emerald-900\/60|border-emerald-500/g, "");
+      });
+      document.querySelectorAll("select").forEach(s => s.value = "");
+      goToMoodleQuestion(1);
+    }
+
+    const extraQuestions = [
+      {
+        q: "Na Álgebra Relacional, qual operador é responsável por filtrar as LINHAS (tuplas) de uma tabela com base em um predicado lógico?",
+        options: ["Projeção (π)", "Seleção (σ)", "Produto Cartesiano (×)", "União (∪)"],
+        correct: 1,
+        exp: "O operador Seleção (σ - Sigma) filtra as linhas/tuplas que atendem à condição lógica."
+      },
+      {
+        q: "Qual das seguintes expressões em Álgebra Relacional retorna apenas os alunos que NÃO estão matriculados em nenhuma disciplina?",
+        options: [
+          "π_RA(Aluno) ∪ π_RA(Matricula)",
+          "π_RA(Aluno) − π_RA(Matricula)",
+          "π_RA(Aluno) ⨝ Matricula",
+          "σ_RA(Aluno) × Matricula"
+        ],
+        correct: 1,
+        exp: "A operação de Diferença (−) entre a relação de todos os alunos e a de matriculados gera os não matriculados."
+      },
+      {
+        q: "No modelo lógico relacional, ao mapear um relacionamento 1:N entre Paciente (1) e Consulta (N), o que deve ser feito com a chave primária?",
+        options: [
+          "A Chave Primária de Paciente migra como Chave Estrangeira (FK) para a tabela Consulta.",
+          "Cria-se obrigatoriamente uma terceira tabela intermediária.",
+          "A Chave de Consulta migra para a tabela Paciente.",
+          "Nenhuma chave é propagada."
+        ],
+        correct: 0,
+        exp: "Em relacionamentos 1:N, a PK da entidade do lado '1' vai para a tabela do lado 'N' como Chave Estrangeira (FK)."
+      },
+      {
+        q: "O que diz a Regra de Integridade de Entidade em bancos de dados relacionais?",
+        options: [
+          "Nenhum atributo da Chave Primária pode conter valores nulos (NULL).",
+          "Toda Chave Estrangeira deve apontar para uma Chave Primária existente.",
+          "Uma tabela não pode ter mais de 10 colunas.",
+          "Os nomes das tabelas devem ser em letras maiúsculas."
+        ],
+        correct: 0,
+        exp: "A Integridade de Entidade assegura que a Chave Primária identifique univocamente cada tupla e nunca seja nula."
+      },
+      {
+        q: "Em um Diagrama Entidade-Relacionamento (DER), o que representa uma elipse dupla?",
+        options: [
+          "Atributo Chave Primária",
+          "Atributo Multivalorado (que pode assumir vários valores, ex: Telefones)",
+          "Atributo Derivado",
+          "Entidade Fraca"
+        ],
+        correct: 1,
+        exp: "Elipse dupla representa atributo multivalorado. Elipse tracejada representa atributo derivado."
+      }
+    ];
+
+    function renderExtraQuiz() {
+      const container = document.getElementById("extra-quiz-container");
+      container.innerHTML = "";
+      extraQuestions.forEach((item, idx) => {
+        const card = document.createElement("div");
+        card.className = "bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3";
+        let opts = "";
+        item.options.forEach((opt, optIdx) => {
+          opts += `
+            <button onclick="handleExtraOptClick(${idx}, ${optIdx})" id="ext-opt-${idx}-${optIdx}" class="w-full text-left p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs sm:text-sm font-medium transition flex items-center space-x-2">
+              <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-[10px] shrink-0">${String.fromCharCode(65 + optIdx)}</span>
+              <span>${opt}</span>
+            </button>
+          `;
+        });
+        card.innerHTML = `
+          <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug">${idx + 1}. ${item.q}</h3>
+          <div class="space-y-1.5">${opts}</div>
+          <div id="ext-exp-${idx}" class="hidden p-3 rounded-xl text-xs"></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function handleExtraOptClick(qIdx, selectedOpt) {
+      const q = extraQuestions[qIdx];
+      const expBox = document.getElementById(`ext-exp-${qIdx}`);
+      expBox.classList.remove("hidden");
+
+      q.options.forEach((_, idx) => {
+        const btn = document.getElementById(`ext-opt-${qIdx}-${idx}`);
+        if (idx === q.correct) {
+          btn.classList.add("border-emerald-500", "bg-emerald-50", "dark:bg-emerald-950/40");
+        } else if (idx === selectedOpt && selectedOpt !== q.correct) {
+          btn.classList.add("border-rose-500", "bg-rose-50", "dark:bg-rose-950/40");
+        }
+      });
+
+      if (selectedOpt === q.correct) {
+        expBox.className = "p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs";
+        expBox.innerHTML = `<strong>Correto!</strong> ${q.exp}`;
+      } else {
+        expBox.className = "p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs";
+        expBox.innerHTML = `<strong>Incorreto!</strong> ${q.exp}`;
+      }
+    }
+
+    function resetExtraQuiz() {
+      renderExtraQuiz();
+    }
+
+    let secondsElapsed = 0;
+    function startTimer() {
+      setInterval(() => {
+        secondsElapsed++;
+        const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, "0");
+        const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, "0");
+        const secs = String(secondsElapsed % 60).padStart(2, "0");
+        document.getElementById("timerDisplay").innerText = `${hrs}:${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle("dark");
+      const icon = document.getElementById("themeIcon");
+      if (document.documentElement.classList.contains("dark")) {
+        icon.className = "fa-solid fa-sun text-xs";
+      } else {
+        icon.className = "fa-solid fa-moon text-xs";
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
